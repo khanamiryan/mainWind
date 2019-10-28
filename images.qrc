@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="/newPrefix">
+    <file>background.png</file>
+    <file>input-block.png</file>
+    <file>IMG_4372.JPG</file>
+    <file>2278079.png</file>
+    <file>kochak.png</file>
+    <file>22349563.jpg</file>
+  </qresource>
+</RCC>
