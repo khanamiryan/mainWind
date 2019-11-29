@@ -1,3 +1,3 @@
 {
-    "files": ["Asset 1.png","testui.py","TCPClient.py","qml.qml","Asset 3.png","Tes.qml","vlcp.py","mainwindow.py","qml.py","kochak.png","tqml.qml","Asset 3.svg","TesForm.ui.qml","test-ui.ui","test.py","BlockItem.qml","v.py","mainwindow.ui","ui.py","images.qrc","qmlother.qml"]
+    "files": ["v.py","mainwindow.ui","Tes.qml","Asset 3.svg","context.py","images.qrc","TCPClient.py","vlcp.py","BlockItemText.qml","ui.py","BlockItem.qml","tqml.qml","testui.py","countdown.qml","mainwindow.py","test-ui.ui","qml.qml","qml.py","mqtt.py","qmlother.qml","kochak.png","test.py","TesForm.ui.qml","Asset 1.png","Asset 3.png","server.py"]
 }

@@ -4,7 +4,13 @@ import sys
 import time
 import os
 import subprocess
-import threading
+import threading 
+
+from inputs import get_gamepad
+
+
+import paho.mqtt.client as mqtt
+
 from urllib.request import urlopen
 from PyQt5.QtCore import QObject, QUrl, Qt, pyqtProperty, pyqtSignal,pyqtSlot
 from PyQt5.QtWidgets import QApplication
@@ -14,6 +20,7 @@ from PyQt5.QtQuick import QQuickView
 from PyQt5.QtQml import QQmlContext
 
 
+import platform
 
 
 # if__name__ == "__main__":
@@ -25,41 +32,175 @@ from PyQt5.QtWidgets import QApplication, QWidget
 # Класс QQuickView предоставляет возможность отображать QML файлы.
 from PyQt5.QtQuick import QQuickView
 
+
+redirectory = "/home/pi/"
+
+
 class QMLManipulate():
     def __init__(self):
         self.subject = self.findQmlByObjectCode('subject')
-    def findQmlByObjectCode(self,objectCode):
-        print(self.view.rootObjects())
-        self.view.rootObjects()[0].findChild(QtCore.QObject, objectCode)
 
+
+    def findQmlByObjectCode(self,objectCode):
+        
+        self.rootObjects()[0].findChild(QtCore.QObject, objectCode)
+
+global status;
+status = "turnedoff";
+def on_connect(client, userdata, flags, rc):#
+    print("Connected with result code "+str(rc))
+    client.subscribe("toDevice/mainDisplay")
+    client.subscribe("toDevice/ALL")
+    client.publish("toServer/mainDisplay", payload='hello', qos=0, retain=False)
+    client.publish("toServer/mainDisplay", payload=status, qos=0, retain=False)
+
+
+
+def publish(message,device="toServer/mainDisplay"):
+    client.publish(device, message)
+
+
+def on_message(msg):
+    newStatus = msg.payload.decode()
+    global status#globali poxaren urish ban mtacel
+    if newStatus == "status":
+        print('status')
+        publish(status)
+    if(newStatus=="turnedoff"):
+        status="turnedoff"
+    if(newStatus=="standby"):
+        status="standby"
+        goStandby()
+    if(newStatus=="startZenqiActivation1"):
+        print('startZenqiActivation1')
+        killVideo()
+        launch.step1()
+        
+    if(newStatus=="startWelcomeVideo"):
+        print('startWelcomeVideo')    
+        # launch.startVideo1();
+        startWelcomeVideo()
+        launch.hide()
+    if(newStatus=="killVideo"):
+        killVideo()
+        launch.hide()
+    if(newStatus=="startEmulation"):
+        launch.hide()
+        startEmulation()
+
+name = "mainDisplay"
+
+
+
+omxp = None
+
+def goStandby():
+    #here will be player
+    status = "standby"
+    
+
+def goTurnedOff():
+    #here is video, that onnection problems
+    status = ""
+
+def startWelcomeVideo():
+    movie_path = "./1.mp4"
+    global omxp
+    if(platform.system()=="Linux"):
+        
+        omxp = subprocess.Popen(['omxplayer',movie_path])
+      #  print(type(omxp))
+    else:
+        omxp = subprocess.run(['open', movie_path], check=True)
+
+
+def killVideo():
+    #global omxp
+    #if(omxp and platform.system()=="Linux"):
+     #   omxp.kill()
+    os.system('killall omxplayer.bin')
+    os.system('killall emulationstation')
+    os.system('killall emulationstatio')
+    os.system('killall retroarch')
+    
+    # status = ""
+
+def startEmulation():
+    os.system('killall omxplayer.bin')
+    os.system('killall emulationstation')
+    os.system('killall retroarch')
+    #subprocess.call("emulationstation", shell=True)
+    #p = subprocess.Popen(['/opt/retropie/supplementary/runcommand/runcommand.sh', '0', '_SYS_', 'snes', '/home/pi/RetroPie/roms/snes/Space Megaforce (USA).sfc'])
+
+    #p = subprocess.call(['/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-snes9x2010/snes9x2010_libretro.so --config /opt/retropie/configs/snes/retroarch.cfg "/home/pi/RetroPie/roms/snes/Space Megaforce (USA).sfc" --appendconfig /dev/shm/retroarch.cfg'])
+    p=subprocess.call('/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-snes9x2010/snes9x2010_libretro.so --config /opt/retropie/configs/snes/retroarch.cfg "/home/pi/RetroPie/roms/snes/Space Megaforce (USA).sfc" --appendconfig /dev/shm/retroarch.cfg',shell=True)
+    #askhatuma
+
+def startFirstVideo():
+    #here
+    status = ""
+    
+def startStep2Video():
+    status = ""
+
+def startStep3Video():
+    status = ""
+def startStep4Video():
+    status = ""
+
+def startStep4FailedVideo():
+    status = ""
 
 class Launch(QtCore.QObject):
-    def __init__(self, view):
-        self.view = view
+    def __init__(self):
         QtCore.QObject.__init__(self)
+        self.view = QQmlApplicationEngine()
+        
         self.step = 1
-
+        
+    client_message = QtCore.pyqtSignal(object)
     textEdit = pyqtSignal(str,int, arguments=['text','step'])
 
-
-
-    # слот для суммирования двух чисел
+    buttonPressed = pyqtSignal(bool, arguments=['pressed'])
+    
+    # слот
     @pyqtSlot(str)
-    def textEdited(self, text):
+    def textEdited(self, text):#stex piti stugvi iravichak@
       self.textEdit.emit(text, self.step)
       if(self.step == 1 and len(text)==3):
-            self.step2()
+          
+          QtCore.QTimer.singleShot(500, self.step2)
+
 
       elif(self.step==2 and len(text)==3):
-            self.step3()
+          QtCore.QTimer.singleShot(500, self.step3)
       elif(self.step==3):
-          text = ''
+        text = ''
+        
       #.....
 
+    @pyqtSlot()
+    def buttonPress(self):
+        
+        print("we are here baby")
+        events = get_gamepad()
+        for event in events:
+            if(event.ev_type=='Key' and event.code=='BTN_THUMB'):
+                self.buttonPressed.emit(event.state)
+                    
 
+
+
+    
+        
 
     def initQML(self):
+        
+        self.view.rootContext().setContextProperty("launch", self)
+        self.view.load(QUrl('qml.qml'))
+
         self.root = self.view.rootObjects()[0]
+        self.root.setProperty('visible',False)
         self.subject = self.findQmlByObjectCode('subject')
         self.textInput = self.findQmlByObjectCode('textInput')
         self.weaponCodeBlock = self.findQmlByObjectCode('weaponCodeBlock')
@@ -67,7 +208,8 @@ class Launch(QtCore.QObject):
         self.coordinatesBlock = self.findQmlByObjectCode('coordinatesBlock')
         #self.coordinatesText = self.findQmlByObjectCode('coordinatesText')
         self.fireBlock = self.findQmlByObjectCode('fireBlock')
-
+        
+        
     def findQmlByObjectCode(self,objectCode):
 
         return self.view.rootObjects()[0].findChild(QtCore.QObject, objectCode)
@@ -75,20 +217,23 @@ class Launch(QtCore.QObject):
     def showBlock(self,block):
        block.setProperty('stateVisible',1)
 
-    def hideBlock(self,blockID):
+    def hideBlock(self,block):
        block.setProperty('stateVisible',0)
-    def changeStep(self,nstep):
+    def changeStep(self,nstep,text=''):
         self.step = nstep
         self.root.setProperty('step',nstep)
-        self.textInput.setProperty('text','')
+        self.textInput.setProperty('text', text)
 
     def step1(self):
-
+        self.root.setProperty('visible',True)
         self.changeStep(1)
         self.textInput.forceActiveFocus()
 
 
         self.showBlock(self.weaponCodeBlock)
+        self.hideBlock(self.coordinatesBlock)
+        self.hideBlock(self.fireBlock)
+
         self.subject.setProperty('text', "Հավաքեք զենքի կոդը")
 
     def step2(self):
@@ -96,19 +241,27 @@ class Launch(QtCore.QObject):
 
         self.textInput.forceActiveFocus()
 
+        self.showBlock(self.weaponCodeBlock)
         self.showBlock(self.coordinatesBlock)
+        self.hideBlock(self.fireBlock)
+
         self.subject.setProperty('text', "Մուտքագրեք կոորդինատները")
 
 
     def step3(self):
         self.changeStep(3)
 
-        self.textInput.setProperty('focus',0)
 
 
+        self.showBlock(self.weaponCodeBlock)
+        self.showBlock(self.coordinatesBlock)
         self.showBlock(self.fireBlock)
         self.subject.setProperty('text', "Սեղմեք կրակելու կոճակը")
-        openjar()
+
+
+        #openjar()
+    def hide(self):
+        self.root.setProperty('visible',False)
 
 
 
@@ -132,106 +285,44 @@ def hideShow(r):
      t.start();
 
 
-class Downloader(QtCore.QObject):
-    def __init__(self, url, filename=None):
-        QtCore.QObject.__init__(self)
-        self._url = url
-
-        if filename is None:
-            filename = os.path.basename(self._url)
-
-        self._filename = filename
-        self._progress = 0.
-        self._running = False
-        self._size = -1
-
-
-
-
-
-
-
-
-
-
-    def _download(self):
-
-        self.on_size.emit()
-        self.progress = 10
-
-        self.running = True
-
-
-
-
-
-    @QtCore.pyqtSlot()
-    def start_download(self):
-        if not self.running:
-            self.running = True
-
-        thread = threading.Thread(target=self._download)
-        thread.start()
-
-    def _get_progress(self):
-        return self._progress
-
-    def _set_progress(self, progress):
-        self._progress = progress
-        self.on_progress.emit()
-
-    def _get_running(self):
-        return self._running
-
-    def _set_running(self, running):
-        self._running = running
-        self.on_running.emit()
-
-    def _get_filename(self):
-        return self._filename
-
-    def _get_size(self):
-        return self._size
-
-    on_progress = QtCore.pyqtSignal()
-    on_running = QtCore.pyqtSignal()
-    on_filename = QtCore.pyqtSignal()
-    on_size = QtCore.pyqtSignal()
-
-
-    progress = QtCore.pyqtProperty(float, _get_progress, _set_progress, notify=on_progress)
-    running = QtCore.pyqtProperty(bool, _get_running, _set_running, notify=on_running)
-    filename = QtCore.pyqtProperty(str, _get_filename, notify=on_filename)
-    size = QtCore.pyqtProperty(int, '', _get_size, notify=on_size)
-
-
-
 
 if __name__ == '__main__':
-
-
+    
     app = QApplication(sys.argv)
 
-    downloader = Downloader('https://cdimage.debian.org/debian-cd/current/armhf/iso-cd/debian-10.1.0-armhf-xfce-CD-1.iso')
-    view = QQmlApplicationEngine()
+    launch = Launch()
+    launch.initQML()
+    client = mqtt.Client(name)
+    client.connect("192.168.2.5",1883)
+    #client.connect("192.168.2.2",1883)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    
+    client.on_message = lambda c, d, msg: launch.client_message.emit(msg)# ays masi shnorhiv a ashkhatel u pyqtsygnali. kareli a pordzel hanel classic durs, kam el hakarak@ mtcnel mej@
+    launch.client_message.connect(on_message)
+        
+    client.loop_start()       
+    
+
+     
+    
+    #downloader = Downloader('https://cdimage.debian.org/debian-cd/current/armhf/iso-cd/debian-10.1.0-armhf-xfce-CD-1.iso')
+    
 
 
-    launch = Launch(view);
+    
+
+
+    
+
+
+
 
     # Объект QQuickView, в который грузится UI для отображения
 
     #view = QtDeclarative.QDeclarativeView()
-    view.rootContext().setContextProperty("downloader", downloader)
-    view.rootContext().setContextProperty("launch", launch)
-
-
-
-
-    #view.setResizeMode(QQuickView.SizeRootObjectToView)
-    view.load(QUrl('qml.qml'))
-
-    launch.initQML()
-    launch.step1()
+   # view.rootContext().setContextProperty("downloader", downloader)
+  
     #view.setContextProperty()
     #view.showFullScreen()
 

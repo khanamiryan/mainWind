@@ -1,29 +1,42 @@
-"""Simple example showing how to get gamepad events."""
 
-from __future__ import print_function
-
-
-import inputs
 import os
-from inputs import devices
-import glob
+import pygame
+import sys
+import time
 
 
+pygame.init()
+pygame.joystick.init()
+
+print(pygame.joystick.get_count())
+
+_joystick = pygame.joystick.Joystick(0)
+_joystick.init()
+print (_joystick.get_init())
+print (_joystick.get_id())
+print (_joystick.get_name())
+print (_joystick.get_numaxes())
+print (_joystick.get_numballs())
+print (_joystick.get_numbuttons())
+print (_joystick.get_numhats())
+print (_joystick.get_axis(0))
 
 
 def main():
-    """Just print out some event infomation when the gamepad is used."""
-    key = 'path'
-    by_path = glob.glob('/dev/input/by-{key}/*-event-*'.format(key=key))
+    done = False
+    numbuttonsCount = _joystick.get_numbuttons()
+    print(numbuttonsCount)
+    while 1:
+        pygame.event.get()
+
+        buttonstate = _joystick.get_button(1) or _joystick.get_button(0)
 
 
-    for device_path in by_path:
-           print(device_path)
 
-#    while 1:
-#        events = get_gamepad()
-#        for event in events:
-#            print(event.ev_type, event.code, event.state)
+
+
+  #print (pygame.joystick.Joystick(0).get_button(0))
+       #print (pygame.joystick.Joystick(0).get_button(1))
 
 
 if __name__ == "__main__":

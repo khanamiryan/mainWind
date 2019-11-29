@@ -1,14 +1,29 @@
-import QtQuick 2.13
-import QtQuick.Controls 2.13
+import QtQuick 2.11
+import QtQuick.Controls 2.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.11
+
 
 ApplicationWindow {
     id: mainWindow
     property int step: 0
     visible: true
-    width: 750
-    height: 500
+    visibility: "FullScreen"
+    width:780 
+    
+    height: 600
+    
+    flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
+    onStepChanged: {
+        if(step===3)
+            countdown.start()
+    }
+     onClosing: close.accepted = false
+    MouseArea {
+        anchors.fill: parent
+        enabled: false
+        cursorShape: Qt.BlankCursor
+    }
 
     //flags: Qt.FramelessWindowHint // Disable window frame
 
@@ -26,6 +41,8 @@ ApplicationWindow {
     property int previousX
     property int previousY
 
+
+
     Item {
 
         id: element
@@ -36,96 +53,132 @@ ApplicationWindow {
         anchors.centerIn: parent
         clip: false
 
-        Image {
-            id: image
-            x: 0
-            y: 0
-            fillMode: Image.PreserveAspectFit
-            source: "background.png"
-        }
+//        Image {
+//            id: image
+//            x: 0
+//            y: 0
+//            fillMode: Image.PreserveAspectFit
+//            source: "background.png"
+//        }
 
 
         Image {
             id: animatedImage
             x: 8
             y: 8
+            fillMode: Image.TileVertically
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.leftMargin: 0
-            source: "input-block.png"
+            source: "input-block-background.png"
             anchors.topMargin: 0
 
             Text {
                 id: subject
                 objectName: "subject"
                 x: 68
-                y: 80
+                y: 114
                 width: 369
-                height: 95
+                height: 76
                 color: "#ffffff"
                 font.family: "GHEA Grapalat"
 
                 horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                verticalAlignment: Text.AlignBottom
                 font.pixelSize: 25
 
 
             }
 
-            TextInput {
+            Image {
+                id: inputImage
+                objectName: "inputImage"
+                x: 83
+                y: 209
+                fillMode: Image.PreserveAspectFit
+                source: "input.png"
 
-                id: textInput
-                objectName: "textInput"
-                x: 134
-                y: 210
-                width: 237
-                height: 63
-                color: "#ffffff"
-                text: ''
-                font.bold: true
-                font.italic: false
-                font.underline: false
-                font.strikeout: false
-                font.preferShaping: true
-                font.letterSpacing: 40
-                renderType: Text.QtRendering
-                activeFocusOnPress: true
-                font.kerning: true
-                font.family: "GHEA Grapalat"
-                horizontalAlignment: Text.AlignCenter
-                padding: 3
-                rightPadding: 2
-                bottomPadding: 2
-                leftPadding: 2
-                topPadding: 2
-                cursorVisible: false
+                TextInput {
 
-                font.capitalization: Font.AllUppercase
-                font.pixelSize: 50
-                maximumLength:3
-                onTextEdited:{
-                    launch.textEdited(textInput.text)
-                    //weaponCodeBlock.text = textInput.text
+                    id: textInput
+                    objectName: "textInput"
+                    x: 48
+                    y: 8
+                    width: 237
+                    height: 52
+                    color: "#ffffff"
+                    text: ''
+                    font.bold: true
+                    font.italic: false
+                    font.underline: false
+                    font.strikeout: false
+                    font.preferShaping: true
+                    font.letterSpacing: 40
+                    renderType: Text.QtRendering
+                    activeFocusOnPress: true
+                    font.kerning: true
+                    font.family: "Arial"
+                    horizontalAlignment: Text.AlignHCenter
+                    padding: 3
+                    rightPadding: 2
+                    bottomPadding: 2
+                    leftPadding: 2
+                    topPadding: 2
+                    cursorVisible: false
+
+                    font.capitalization: Font.AllUppercase
+                    font.pixelSize: 50
+                    maximumLength:3
+                    onTextEdited:{
+                        launch.textEdited(textInput.text)
+                        //weaponCodeBlock.text = textInput.text
+                    }
+
                 }
-
             }
 
+
             states: [
-                State {
-
-                    when: mainWindow.step===3
+                State{
+                    name:"step1"
+                    when: mainWindow.step===1
                     PropertyChanges {
-                        target: textInput
-
-                        opacity: 0
+                        target: weaponCodeBlock
+                        stateVisible:true
                     }
+                },
+                State{
+                    name:"step2"
+                    when: mainWindow.step===2
+                    PropertyChanges {
+                        target: weaponCodeBlock
+                        stateVisible:true
+                    }
+                    PropertyChanges {
+                        target: coordinatesBlock
+                        stateVisible:true
+                    }
+                },
+
+                State {
+                    name:"step3"
+                    when: mainWindow.step===3
+                    
                     PropertyChanges {
                         target: subject
-                        y: 192
+                        y: 187
                         opacity: 1
                         scale:1
+                        color: "red"
+
+                    }
+                    PropertyChanges {
+                        target: inputImage
+                        visible:false
+
                     }
                 }
+
 
             ]
             transitions: [
@@ -138,27 +191,32 @@ ApplicationWindow {
                         duration: 400
 
                     }
+
+                },
+                Transition {
+
+                    to: "step3"
                     SequentialAnimation{
 
-                    loops: Animation.Infinite
-                    ScaleAnimator {
-                           target: subject;
-                           from: 1;
-                           to: 1.1;
+                        loops: Animation.Infinite
+                        ScaleAnimator {
+                            target: subject;
+                            from: 1;
+                            to: 1.1;
                             easing.type: Easing.OutCirc
-                           duration: 500
+                            duration: 500
 
 
-                       }
-                    ScaleAnimator {
-                           target: subject;
-                           from: 1.1;
-                           to: 1;
+                        }
+                        ScaleAnimator {
+                            target: subject;
+                            from: 1.1;
+                            to: 1;
                             easing.type: Easing.OutCirc
-                           duration: 500
+                            duration: 500
 
 
-                       }
+                        }
                     }
                 }
             ]
@@ -182,7 +240,7 @@ ApplicationWindow {
                 id: coordinatesBlock
                 objectName: "coordinatesBlock"
                 x: 200
-                source: "Asset 2.png"
+                source: "coordinatner.png"
 
 
             }
@@ -192,7 +250,21 @@ ApplicationWindow {
                 objectName: "fireBlock"
                 x: 200
                 source: "Asset 3.png"
-                text: mainWindow.step
+                text: ''
+                function buttonPress(isPressed) {
+                    if(isPressed){
+                        countdown.subject.text="Սեղմել ենք"
+                    }
+                }
+
+                CountDown{
+                    id:countdown
+                    seconds: 10
+                    defaultSeconds: 10
+                    onTriggert:{
+                        subject.text="Դուք պարտվեցիք"
+                    }
+                }
 
             }
 
@@ -201,14 +273,17 @@ ApplicationWindow {
     Connections {
         target: launch
 
-        // Обработчик сигнала сложения
+        // Обработчик сигнала 
         onTextEdit: {
-            // sum было задано через arguments=['sum']
+
             if(step==1)
                 weaponCodeBlock.text = text
             else if(step==2)
                 coordinatesBlock.text = text
 
+        }
+        onButtonPressed:{ 
+            countdown.subject.text="Սեղմել ենք"
         }
 
     }
