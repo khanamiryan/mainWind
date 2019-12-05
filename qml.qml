@@ -2,18 +2,25 @@ import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.11
+import QtQuick.Window 2.1
+
+
+
 
 
 ApplicationWindow {
     id: mainWindow
     property int step: 0
+    property bool isWin: false
+    // property var buttonAlreadyPressed: false
     visible: true
     visibility: "FullScreen"
     width:780 
-    
+    screen: Qt.application.screens[0]
     height: 600
     
-    flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
+    
+    flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint 
     onStepChanged: {
         if(step===3)
             countdown.start()
@@ -28,6 +35,7 @@ ApplicationWindow {
     //flags: Qt.FramelessWindowHint // Disable window frame
 
     // Declare properties that will store the position of the mouse cursor
+    
     Image {
         id: imag2
         x: 0
@@ -86,6 +94,17 @@ ApplicationWindow {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignBottom
                 font.pixelSize: 25
+                
+            
+                property string sText: ""
+                // ### Important part ###
+                text: sText
+                Behavior on sText {
+                    FadeAnimation {
+                        target: subject
+                    }
+                }
+                // ######################
 
 
             }
@@ -130,6 +149,7 @@ ApplicationWindow {
                     font.pixelSize: 50
                     maximumLength:3
                     onTextEdited:{
+                        
                         launch.textEdited(textInput.text)
                         //weaponCodeBlock.text = textInput.text
                     }
@@ -162,14 +182,17 @@ ApplicationWindow {
 
                 State {
                     name:"step3"
-                    when: mainWindow.step===3
+                    when: mainWindow.step===3||mainWindow.step===30
                     
                     PropertyChanges {
                         target: subject
                         y: 187
                         opacity: 1
                         scale:1
-                        color: "red"
+                        color: '#ffffff'
+                        font.bold :true
+                        lineHeight: 1.5 
+                        
 
                     }
                     PropertyChanges {
@@ -177,6 +200,8 @@ ApplicationWindow {
                         visible:false
 
                     }
+
+                    
                 }
 
 
@@ -251,24 +276,50 @@ ApplicationWindow {
                 x: 200
                 source: "Asset 3.png"
                 text: ''
-                function buttonPress(isPressed) {
-                    if(isPressed){
-                        countdown.subject.text="Սեղմել ենք"
-                    }
-                }
+            
 
                 CountDown{
                     id:countdown
                     seconds: 10
                     defaultSeconds: 10
                     onTriggert:{
-                        subject.text="Դուք պարտվեցիք"
+                        buttonOrCountdown(false,true)
                     }
                 }
 
             }
 
         }
+    }
+    
+    function buttonOrCountdown(pressed,fromCountdown) {
+            if (fromCountdown === undefined) fromCountdown = false
+            if(pressed&&step==30){
+                
+                    subject.sText = "FATAL ERROR\nՏեղի է ունեցել սխալմունք"
+                    isWin = false
+            }
+            
+            if(step==3&&!isWin){
+                if(!fromCountdown&&pressed&&countdown.seconds>0){
+                    if(weaponCodeBlock.text.toUpperCase()=="ASH"&&coordinatesBlock.text=="001"){
+                        subject.sText = "Այոոոո"
+                        countdown.stop()
+                        isWin = true
+                    }
+                    else{
+                        subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"
+                        countdown.stop()
+                        isWin = false
+                    }
+                }else{
+                    subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"//chen sexmel knopken
+                    isWin = false
+                }
+            }
+            
+
+            launch.buttonPressFromQml(step,countdown.seconds,isWin)
     }
     Connections {
         target: launch
@@ -283,7 +334,7 @@ ApplicationWindow {
 
         }
         onButtonPressed:{ 
-            countdown.subject.text="Սեղմել ենք"
+            buttonOrCountdown(pressed)
         }
 
     }

@@ -24,7 +24,7 @@ if __name__ == '__main__':
     view = QQmlApplicationEngine()
 
 
-    
+    view.load(QUrl('allscreens.qml'))
   
     
 
