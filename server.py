@@ -1,6 +1,10 @@
 
 import sys
 import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+os.chdir(dir_path)
+print (sys.path)
+
 import threading
 import time
 
@@ -59,15 +63,38 @@ def on_message(client, userdata, msg):
     topic = msg.topic
 
     # print("topic is "+topic)
-    # print("message is \""+message+"\"")
+    print("message is \""+message+"\"")
     
     
+    
+
+        
     if(topic.find("toServer/")==0):#status@ grum enq dictionaryi mej, vor imanananq verjin ekac status@
         dev = topic.replace("toServer/","")
         if(dev in devices and message in statuses):
           devices[dev]["status"] = message
 
 
+    if(message=="step-4"):
+        startStep4()
+    if(message=="step-5"):
+        startStep5()
+    if(message=="step-6"):
+        startStep6()
+    if(message=="step-8"):
+        print("step8")
+        startStep8()
+    if(message=="step-7"):
+        print("step7")
+        startStep7()
+    if(message=="winner"):
+        print("winner")
+        winner()
+        # print("step",newStatus)
+        # print ("ssss")
+        # stepfunc = message.replace("step-","")
+        # newfunc = ("startStep"+stepfunc)
+        # newfunc()
 
     if(message=="startGame" and not isStarted and step==False):#sksum enq xax@
         startGame()
@@ -79,7 +106,7 @@ def on_message(client, userdata, msg):
     if(message=="FirstVideoEnded"):
         
         startStep2()
-    if(step==2 and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
+    if((step==1 or step==2) and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
         startStep3()
     if(step==3 and getStatus("balls3")=="finished" and getStatus("larer")=="finished"):
         startStep4()
@@ -97,7 +124,7 @@ def on_message(client, userdata, msg):
         startStep8()
     if(step==8 and  message=="Step8VideoEnded"):
         continueStep8()##patmec, vor moloraker@ xarnvel en, petq banali ta, vor bacen, nayev taqun pahac@
-    if(step==8 and message=="5" and client=="toServer/molorakner"):#?? stugel chisht em grel client@?
+    if(step==8 and message=="3" and client=="toServer/molorakner"):#?? stugel chisht em grel client@?
         winner()
     if(message=="WinnerVideoEnded"):
         winnerVideoEnded()
@@ -147,10 +174,13 @@ def getStatus(dev):
 
 def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
     global step, isStarted
-
+    
     publish("ALL","finished")
     publish("mainDisplay", "resetBlocks")
     publish("lazer","closeLAZER")
+    publish("lazer","closeLUYS")
+    publish("mainDisplay", "standby")
+    publish("relener","down")
     isStarted=False
     step = 0
 
@@ -158,36 +188,46 @@ def startGame():
     global step, isStarted 
     isStarted=True
     step = 1
+    
     print("starting the game")
+    resetGame()
     publish("ALL","finished")
     publish("lazer","closeLAZER")
-    time.sleep(2)
+    publish("lazer","closeLUYS")
+    
     publish("mainDisplay","startWelcomeVideo")
 
 def firstTurnoffAll():#arajin angam anjatvum sax
     publish("ALL","turnedoff")
-    time.sleep(5)
+    publish("lazer","openLUYS")
+    
+    publish("luyser","standby")
     publish("mainDisplay","startFirstVideo")
+
 #skzbic luys@,
 
 def startStep2():# mianum en en luyser vor petq a sarqen, vor askhati
     global step
     print("startStep2s")
     step=2
-    publish("mainDisplay","startStep2Video")
-    time.sleep(5)
-    publish("luyser","standby")
+    #publish("mainDisplay","startStep2Video")
+    time.sleep(2)
+    
+    
 
 def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
     global step
     step=3
-    publish("lazer","standby")#mianum en senyaki luyser@
-    time.sleep(0.2)#navsyaki, qani vor nuyn device in enq message uxarkum
     publish("lazer","closeLUYS")#mianum en senyaki luyser@
+    publish("lazer","standby")#mianum en senyaki luyser@
+    #time.sleep(0.2)#navsyaki, qani vor nuyn device in enq message uxarkum
+    
     publish("mainDisplay","startStep3Video")
-    time.sleep(5.0)
+    time.sleep(1.0)
     publish("balls3","standby")
     publish("larer","standby")
+    publish("relener","openD3")
+    
     publish("balonner","standby")#???
 
 
@@ -221,14 +261,14 @@ def startStep5():#erb petq e xax xaxan
     step=5
     publish("relener","openD6")#cxi apparati miacum
     publish("mainDisplay","startEmulation")
-    t = threading.Timer(15, startStep5Continue)##qani varkyan en xaxum
+    t = threading.Timer(150, startStep5Continue)##qani varkyan en xaxum
     t.start()
 
 def startStep5Continue():#xax@ avartecin asuma, petq a zenqov kraken
     global step
     step=5
     publish("mainDisplay","startFirstWeaponUseVideo")
-    time.sleep(2)
+    time.sleep(4)
     publish("mainDisplay","stopEmulation")
 
 def startFirstWeaponUse():
@@ -243,10 +283,10 @@ def stopSmoke():
 def startStep6():#petq a licqavoren zenq@
     global step
     step=6
-
+    print("step is 6")
     publish("relener","openD7")#cxi apparat@ miacaca, taqacaca,  miacnum enq cux@
 
-    time.sleep(5)
+    time.sleep(2)
 
     publish("lazer","openLUYS")#anjatum en senyaki luyser@
     
@@ -255,15 +295,22 @@ def startStep6():#petq a licqavoren zenq@
     publish("mainDisplay","startStep6Video")
     time.sleep(2)
     publish("lazer","openLAZER")#mianuma lazer@
-    publish("lazer","lazerTime")#mianuma lazer@, dra hamar ampulaner@ piti hatuk dzev linen
+    publish("mainDisplay","lazerTime")#mianuma lazer@, dra hamar ampulaner@ piti hatuk dzev linen
+    publish("mainPanel","lazerTime")#mianuma lazer@, dra hamar ampulaner@ piti hatuk dzev linen
+    
 
 def startStep7():##videon mianuma, klaviatiuran barcranuma, erb iranq petq havaqen chisht kod@
     global step
     step=7
     publish("mainDisplay","startStep7Video")
     publish("lazer","closeLAZER")
+    
     publish("relener","up")
     publish("mainPanel","keyboardActive")
+    time.sleep(3)
+    killvideo()
+    continueStep7()
+
     # publish("klaviatura","startturnedoff") #het qashenq klaviaturan
     # openDoor(1) #bacel 1 magnisov dur@
     # time.sleep(5)
@@ -279,13 +326,15 @@ def startStep8():
     publish("mainDisplay","startStep8Video")
     publish("relener","down")
     publish("mainPanel","keyboardActive")
+    publish("lazer","closeLUYS")#miacnum en senyaki luyser@
 
 def continueStep8():
     global step
     step=8
-    publish("relener","openD1")
+    publish("relener","openD1")#?
     time.sleep(0.1)
-    publish("relener","openD2")
+    publish("relener","openD2")#?
+    publish("relener","openD5")
     publish("leftPanel","hidden")
     publish("molorakner","standby")##active??
 
@@ -293,15 +342,16 @@ def continueStep8():
 
 
 def winner():#haxtecin
-    publish("mainDisplay","startWinnerVideo")
+    publish("mainDisplay","startWinnerVideo") 
     publish("ALL","finished")
 
 def winnerVideoEnded():
     publish("lazer","openDUR")
     time.sleep(0.1)
-    publish("lazer","openDrsiDUR")
+    publish("lazer","openDRSIDUR")
     time.sleep(5)    
     resetGame()
+
 
 
 
@@ -347,7 +397,7 @@ def openDoor(doorID):
 def closeDoor(doorID):
     publish("doors",doorID+"ON") #Pakel  magnisov dur@ (miacnel magnis@)
 
-def main_loop():
+def main_loop(): 
     while 1:
       time.sleep(0.1)
 
@@ -355,8 +405,14 @@ def main_loop():
 
 
 if __name__ == '__main__':
+    print(sys.argv) 
+    if(len(sys.argv)>1 and sys.argv[1]=="boot"):
+        
+        print("sleep from boot")
+        time.sleep(15) 
+
     client = mqtt.Client("mainServer")
-    client.connect("192.168.0.100",1883,60)
+    client.connect("192.168.0.100",1883)
 
     client.on_connect = on_connect
     client.on_message = on_message

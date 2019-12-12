@@ -2,7 +2,7 @@ import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtGraphicalEffects 1.0
 import QtQuick.Layouts 1.11
-import QtQuick.Window 2.1
+import QtQuick.Window 2.3
 
 
 
@@ -17,11 +17,14 @@ ApplicationWindow {
     visibility: "FullScreen"
     width:780 
     screen: Qt.application.screens[0]
+    x: screen.virtualX
+    y: screen.virtualY + screen.height - height
     height: 600
     
     
     flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint 
     onStepChanged: {
+        console.log(mainWindow.step)
         if(step===3)
             countdown.start()
     }
@@ -302,7 +305,7 @@ ApplicationWindow {
             
             if(step==3&&!isWin){
                 if(!fromCountdown&&pressed&&countdown.seconds>0){
-                    if(weaponCodeBlock.text.toUpperCase()=="ASH"&&coordinatesBlock.text=="001"){
+                    if(weaponCodeBlock.text.toUpperCase()=="GLC"&&coordinatesBlock.text=="163"){
                         subject.sText = "Այոոոո"
                         countdown.stop()
                         isWin = true
