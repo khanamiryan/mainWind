@@ -6,13 +6,21 @@ import os
 import subprocess 
 import threading
 
+import platform
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 os.chdir(dir_path)
-import pyautogui
 
+if(platform.system()=="Linux"):
+    import pyautogui
+    from inputs import get_gamepad
+    from omxplayer.player import OMXPlayer
+    import RPi.GPIO as GPIO
 
-from inputs import get_gamepad
+    GPIO.setmode(GPIO.BCM)
+
+    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)#Button to GPIO23
+    GPIO.setup(24, GPIO.OUT)  #LED to GPIO24
 
 
 import paho.mqtt.client as mqtt
@@ -26,19 +34,13 @@ from PyQt5.QtQuick import QQuickView
 from PyQt5.QtQml import QQmlContext
 
 
-from omxplayer.player import OMXPlayer
+
 from pathlib import Path
 
 
-import platform
 
-import RPi.GPIO as GPIO
-import time
 
-GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)#Button to GPIO23
-GPIO.setup(24, GPIO.OUT)  #LED to GPIO24
 
 # if__name__ == "__main__":
 #     pass
@@ -106,10 +108,10 @@ def on_message(msg):
         startVideo("Step4")#sranic heto emulaciana mianym
     
     if(newStatus == "startFirstWeaponUseVideo"):#arajin angam zenqi havaqelna, vor traquma zenq@
-        startVideo("FirstWeaponUse",False)
+        startVideo("FirstWeaponUse",False,minimal_position=0)
     if(newStatus == "startFirstWeaponUse"):#arajin angam zenqi havaqelna, vor traquma zenq@        
         launch.step3ForFail()
-        killVideo()
+        stopMainVideo()
     if(newStatus=="startStep6Video"):##lazerov petqa licqavoren, asuma vor sxal en krakel, ruchnoy piti licqavoren anen, petqa mi qani angam asi es mek@
         startVideo("Step6")
         launch.hide()
@@ -119,7 +121,7 @@ def on_message(msg):
     if(newStatus=="startRealWeaponUse" or newStatus=="startZenqiActivation1"):
         launch.step1()
         time.sleep(2)
-        killVideo()##petq en?
+        stopMainVideo()##petq en?
 
     if(newStatus=="startStep8Video"):##video, voric heto arden piti havaqen kod@
         startVideo("Step8")
@@ -129,8 +131,8 @@ def on_message(msg):
 
 
     if(newStatus=="killVideo"):
-
-        killVideo()
+        stopMainVideo()
+        
     if(newStatus=="startEmulation"):
 
         startEmulation()
@@ -150,7 +152,7 @@ def on_message(msg):
         
 
 name = "mainDisplay"
-displays = [2,7]# ekranneri kod@
+
 
 
 
@@ -169,12 +171,14 @@ omxp_thread[0] = threading.Thread()
 omxp_thread[1] = threading.Thread()
 emulationstate = False
 
+
 standby_video = "Standby"
+
 
 def volumeUp():
     global playerVolume
     if(playerVolume<1):
-        playerVolume+=0.1
+        playerVolume+=0.05
         players[activePlayer].set_volume(playerVolume)
         print(playerVolume)
     
@@ -184,7 +188,7 @@ def volumeUp():
 def volumeDown():
     global playerVolume
     if(playerVolume>0):
-        playerVolume-=0.1
+        playerVolume-=0.05
         players[activePlayer].set_volume(playerVolume)
         print(playerVolume)
     
@@ -193,6 +197,7 @@ def volumeDown():
 
 
 def goStandby():
+    global status
     #here will be player
     status = "standby"
     startSecondMonitor()
@@ -200,6 +205,7 @@ def goStandby():
     startSecondMonitor("standby-secondary")
 
 def goTurnedOff():
+    global status
     #here is video, that onnection problems
     status = "turnedoff"
     startSecondMonitor("turnedoff-secondary")
@@ -245,19 +251,19 @@ def player_position_thread(publish_text = "",minimal_position = 3,standby_video=
 
 
 
-def exitVideoEvent(event_code,movie_path,player):
-    print('exit', event_code)
-    ##tt.cancel()
-    if(event_code==0):
-        omxp_thread[player].cancel()
-    #if(event_code==0):
-     #   startVideo(movie_path)
+# def exitVideoEvent(event_code,movie_path,player):
+#     print('exit', event_code)
+#     ##tt.cancel()
+#     if(event_code==0):
+#         omxp_thread[player].cancel()
+#     #if(event_code==0):
+#      #   startVideo(movie_path)
 
 
 
 
 
-def startVideo(movie_path="Standby",loop=True,options=""):
+def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3):
     global omxp
     global omxp3
     global players
@@ -267,12 +273,13 @@ def startVideo(movie_path="Standby",loop=True,options=""):
     global playerVolume
     
     if(platform.system()=="Linux"):
-        print("strting vidfe",movie_path)
+        
         VIDEO_PATH = Path("./videos/"+movie_path+".mp4")
         if(not os.path.exists(VIDEO_PATH)):
             print("file", VIDEO_PATH, "not exists")
             return "notok"
-        thread_args={"publish_text":movie_path+"VideoEnded"}
+        thread_args={"publish_text" : movie_path+"VideoEnded"}
+
         if(os.path.exists("./videos/"+movie_path+"-Standby.mp4")):
             thread_args["standby_video"]=movie_path+"-Standby"
             loop=False##guce heto hanenq
@@ -293,14 +300,16 @@ def startVideo(movie_path="Standby",loop=True,options=""):
                     dbus_name=dbusNames[activePlayer],args=vargs)
 
         
-        print("player ",activePlayer,"is activated")
-        print("lastActivePlayer is ",lastActivePlayer)
+        # print("player ",activePlayer,"is activated")
+        # print("lastActivePlayer is ",lastActivePlayer)
         thread_args["called_player"]=activePlayer
-
+        if(minimal_position):
+            thread_args["minimal_position"] = minimal_position
         players[activePlayer].pause()    
 
+
         if(players[lastActivePlayer] is not None):
-            print(players[lastActivePlayer])
+            print("players last active",players[lastActivePlayer],"going to be killed")
             time.sleep(0.5)
             try:
                 players[lastActivePlayer].stop()
@@ -311,11 +320,10 @@ def startVideo(movie_path="Standby",loop=True,options=""):
         players[activePlayer].play()
         players[activePlayer].set_volume(playerVolume)
         print(playerVolume)
-
- 
-            
     
-        killEmulation()##esim
+
+        if(emulationstate==True):
+            killEmulation()
            
             
             # omxp.load(VIDEO_PATH,args=vargs)
@@ -325,12 +333,15 @@ def startVideo(movie_path="Standby",loop=True,options=""):
             
             
         
-        print(thread_args)
+        #print(thread_args)
+
+
        # omxp_thread[activePlayer] = threading.Timer(players[activePlayer].duration()-3,timer_video, kwargs=thread_args)
         #omxp_thread[activePlayer].start()
         #print("movie_path",movie_path)
         #players[activePlayer].exitEvent += lambda _, exit_code: exitVideoEvent(exit_code,movie_path,activePlayer)
-        omxp_thread[activePlayer] = threading.Thread(target=player_position_thread,kwargs=thread_args )
+
+        omxp_thread[activePlayer] = threading.Thread(target=player_position_thread, kwargs=thread_args )
     
         omxp_thread[activePlayer].start()  
         #omxp_thread[activePlayer].join()  
@@ -370,46 +381,42 @@ def openEmulationMenu():
     
 
 
-def killVideo():
-    global omxp
-    global omxp3
+def stopMainVideo():
     global players
     global activePlayer
+
     try:
         if(players[activePlayer] is not None):
             players[activePlayer].stop()
-            #omxp.quit()
     except Exception as err: 
+        print ("stopMainVideo error", err)
         return "notok "
 
 def startEmulation():
     global p
-    # os.system('killall omxplayer.bin')
-    
-    
-     #subprocess.call("emulationstation", shell=True)
-    #p = subprocess.Popen(['/opt/retropie/supplementary/runcommand/runcommand.sh', '0', '_SYS_', 'snes', '/home/pi/RetroPie/roms/snes/Space Megaforce (USA).sfc'])
-    #p = subprocess.call(['/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-snes9x2010/snes9x2010_libretro.so --config /opt/retropie/configs/snes/retroarch.cfg "/home/pi/RetroPie/roms/snes/Space Megaforce (USA).sfc" --appendconfig /dev/shm/retroarch.cfg'])
-    # pipe = subprocess.PIPE
+    global emulationstate
     
     killEmulation()
     
-
-    #startVideo("emulationstart",False)#video sksum, vor sirun lini, chtarti
-    killVideo()
     p=subprocess.Popen('/opt/retropie/emulators/retroarch/bin/retroarch -L /opt/retropie/libretrocores/lr-snes9x2010/snes9x2010_libretro.so --config /opt/retropie/configs/snes/retroarch.cfg "/home/pi/RetroPie/roms/snes/Space Megaforce (USA).sfc" --appendconfig /dev/shm/retroarch.cfg',shell=True)
     emulationstate = True
-    if(omxp is not None):
-        time.sleep(2)
-        omxp.quit()
+
+    time.sleep(2)
+    launch.hide()
+
+    stopMainVideo()
+    
+    
 
     
     #askhatuma
 
 def killEmulation():
-    os.system('killall emulationstation 2>/dev/null')
-    os.system('killall emulationstatio 2>/dev/null')
-    os.system('killall retroarch 2>/dev/null')
+    global emulationstate
+    if(emulationstate == True):
+        os.system('killall emulationstation 2>/dev/null')
+        os.system('killall emulationstatio 2>/dev/null')
+        os.system('killall retroarch 2>/dev/null')
     emulationstate = False
 
 
@@ -467,7 +474,6 @@ class Launch(QtCore.QObject):
                     
     def button_thread(self):
     
-
         try:
             while True:
                 self.buttonState = not GPIO.input(23)
@@ -481,13 +487,14 @@ class Launch(QtCore.QObject):
         except Exception as err:
             print("err",err)
             GPIO.cleanup()
+
     # слот
     @pyqtSlot(str)
     def textEdited(self, text):#stex piti stugvi iravichak@
         self.textEdit.emit(text, self.step)
         if(self.step == 1 and len(text)==3):
-            print(text)
-            if(text=="glc"):##nayev mecatar
+            
+            if(text.upper()=="GLC"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
                 self.subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"
@@ -554,7 +561,6 @@ class Launch(QtCore.QObject):
         self.textInput.setProperty('text', "")
         self.subject.setProperty('sText', "")
         self.root.isWin = False
-
 
 
     def showBlock(self,block):
@@ -659,14 +665,14 @@ if __name__ == '__main__':
     launch = Launch()
     launch.initQML()
     client = mqtt.Client(name)
-    client.connect("192.168.0.100",1883)
-    #client.connect("192.168.2.2",1883)
+    #client.connect("192.168.0.100",1883)
+    client.connect("127.0.0.1",1883)
     client.on_connect = on_connect
     client.on_message = on_message
     
     client.on_message = lambda c, d, msg: launch.client_message.emit(msg)# ays masi shnorhiv a ashkhatel u pyqtsygnali. kareli a pordzel hanel classic durs, kam el hakarak@ mtcnel mej@
     launch.client_message.connect(on_message)
-    killVideo()
+    stopMainVideo()
     resetApps()
     goStandby() 
     

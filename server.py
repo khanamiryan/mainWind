@@ -75,6 +75,8 @@ def on_message(client, userdata, msg):
           devices[dev]["status"] = message
 
 
+    if(message=="step-3"):
+        startStep4()
     if(message=="step-4"):
         startStep4()
     if(message=="step-5"):
@@ -82,13 +84,12 @@ def on_message(client, userdata, msg):
     if(message=="step-6"):
         startStep6()
     if(message=="step-8"):
-        print("step8")
         startStep8()
     if(message=="step-7"):
-        print("step7")
+      
         startStep7()
     if(message=="winner"):
-        print("winner")
+     
         winner()
         # print("step",newStatus)
         # print ("ssss")
@@ -100,12 +101,12 @@ def on_message(client, userdata, msg):
         startGame()
     if(message=="startGameForce"):#sksum enq noric, amen depqum
         startGame()
-    if(message=="WelcomeVideoEnded"):
-        firstTurnoffAll()
+    if(message=="WelcomeVideoEnded"): #step 1
+        startStep2()
 
     if(message=="FirstVideoEnded"):
-        
         startStep2()
+
     if((step==1 or step==2) and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
         startStep3()
     if(step==3 and getStatus("balls3")=="finished" and getStatus("larer")=="finished"):
@@ -137,25 +138,6 @@ def on_message(client, userdata, msg):
         keyboardStopped()
     
 
-
-    # if(step==4 and getStatus("element")=="failed"):#chi stacvum luyser@, ancnnen myus blokin
-    #     startStep4Failed()
-    # if(step==4 and getStatus("element")=="finished"):#haxtecin luyser@, ancnnen myus blokin
-    #     startStep5()
-    if(getStatus("klaviatura")=="finished"):#klaviaturan bardzracav
-        klaviaturaActivationEnded()
-    if(getStatus("klaviatura")=="turnedoff"):#anjatecinq klaviaturan, vor ijni
-            klaviaturaDeActivationEnded()
-
-    if(step==5 and message=="step5VideoEnded"):
-        zenqiActivation1()
-    if(step==5 and message=="zenqiActivation1Failed"):
-        zenqiActivation1Failed()
-    if(step==5 and message=="zenqiActivation1FailedVideoEnded"):
-        zenqiActivation2()
-    if(step==5 and message=="zenqiActivation2Finished"):#todo avelacnel mainDisplay finished kam nman ban
-        startStep6()
-        klaviaturaDeactivation()
     
 
 
@@ -169,6 +151,7 @@ printit()
 def publish(module,message,device=toDevice):
     print ("send",message,"to ", device+module)    
     client.publish(device+module, message)
+
 def getStatus(dev):
     return devices[dev]["status"]
 
@@ -176,11 +159,14 @@ def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
     global step, isStarted
     
     publish("ALL","finished")
-    publish("mainDisplay", "resetBlocks")
-    publish("lazer","closeLAZER")
-    publish("lazer","closeLUYS")
+
+    publish("mainDisplay", "resetBlocks") #0acnum enq glxavor ekrani cragir@
+
+    publish("lazer","closeLAZER") #lazer@ anjatum enq
+    publish("lazer","closeLUYS")#luyser@ miacnum enq
     publish("mainDisplay", "standby")
-    publish("relener","down")
+
+    publish("relener","down")#ijacnum enq klaviarutan
     isStarted=False
     step = 0
 
@@ -192,26 +178,19 @@ def startGame():
     print("starting the game")
     resetGame()
     publish("ALL","finished")
-    publish("lazer","closeLAZER")
-    publish("lazer","closeLUYS")
-    
+
     publish("mainDisplay","startWelcomeVideo")
 
-def firstTurnoffAll():#arajin angam anjatvum sax
+
+def startStep2():#arajin angam anjatvum sax
+    global step
+    step=2
+    
     publish("ALL","turnedoff")
     publish("lazer","openLUYS")
-    
     publish("luyser","standby")
     publish("mainDisplay","startFirstVideo")
-
-#skzbic luys@,
-
-def startStep2():# mianum en en luyser vor petq a sarqen, vor askhati
-    global step
-    print("startStep2s")
-    step=2
-    #publish("mainDisplay","startStep2Video")
-    time.sleep(2)
+    
     
     
 
@@ -219,30 +198,28 @@ def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
     global step
     step=3
     publish("lazer","closeLUYS")#mianum en senyaki luyser@
+    time.sleep(0.1)#navsyaki, qani vor nuyn device in enq message uxarkum
     publish("lazer","standby")#mianum en senyaki luyser@
-    #time.sleep(0.2)#navsyaki, qani vor nuyn device in enq message uxarkum
     
     publish("mainDisplay","startStep3Video")
-    time.sleep(1.0)
+    time.sleep(5.0) # 5 varkyan heto nor mianan 
     publish("balls3","standby")
     publish("larer","standby")
-    publish("relener","openD3")
-    
-    publish("balonner","standby")#???
+    publish("relener","openD3") #gndakner@ amenaaji darakum en, bacum enq
+    #publish("balonner","standby")#???
 
 
 def startStep4(): #todo es mas@ poxvum a, karchanum a
     global step
     step=4
     
-    publish("mainDisplay","standby")
-    publish("leftMonitor","standby")
-    
     publish("mainPanel","standby")
     publish("leftPanel","standby")
     publish("rightPanel","standby")
     time.sleep(2)
+    publish("mainDisplay","standby")
     publish("mainDisplay","startStep4Video")#ayooo miacanq
+    
     
 
 # def startStep4second():#erb element@ texdrel en u zaryadka en talis
@@ -412,7 +389,8 @@ if __name__ == '__main__':
         time.sleep(15) 
 
     client = mqtt.Client("mainServer")
-    client.connect("192.168.0.100",1883)
+    #client.connect("192.168.0.100",1883)
+    client.connect("127.0.0.1",1883)
 
     client.on_connect = on_connect
     client.on_message = on_message
