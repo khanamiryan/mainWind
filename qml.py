@@ -59,7 +59,8 @@ status = "standby"
 def on_connect(client, userdata, flags, rc):#
     print("Connected with result code "+str(rc))
     client.subscribe("toDevice/mainDisplay")
-    client.subscribe("toDevice/ALL")
+    #pordznakan anjatenq all@
+    #client.subscribe("toDevice/ALL") 
     client.publish("toServer/mainDisplay", payload='hello', qos=0, retain=False)
     client.publish("toServer/mainDisplay", payload=status, qos=0, retain=False)
 
@@ -68,14 +69,16 @@ def on_connect(client, userdata, flags, rc):#
 def publish(message,device="toServer/mainDisplay"):
     client.publish(device, message)
 
+notStartVideo = False ##sa nra hamar e, vor erb vor petq chi inch hajord videon miacnel, bayc status@ petqa, asenq standby gnaluc ev ayln
+
 
 def on_message(msg):
     
-    global status#globali poxaren urish ban mtacel
-
+    global status
+    global notStartVideo
 
     newStatus = msg.payload.decode()
-    
+    topic = msg.topic
     if newStatus == "status":
         print(status)
         publish(status)
@@ -85,6 +88,8 @@ def on_message(msg):
     if(newStatus=="standby"):
         status="standby"
         goStandby()
+    if(newStatus=="notStartVideo"):
+        notStartVideo = True#sa darnum a mi angam True, minchev video chlini, vor anjatvi sa
 
     
    
@@ -108,7 +113,7 @@ def on_message(msg):
         startVideo("Step4")#sranic heto emulaciana mianym
     
     if(newStatus == "startFirstWeaponUseVideo"):#arajin angam zenqi havaqelna, vor traquma zenq@
-        startVideo("FirstWeaponUse",False,minimal_position=0)
+        startVideo("FirstWeaponUse",False,minimal_position=2)
     if(newStatus == "startFirstWeaponUse"):#arajin angam zenqi havaqelna, vor traquma zenq@        
         launch.step3ForFail()
         stopMainVideo()
@@ -120,14 +125,16 @@ def on_message(msg):
 
     if(newStatus=="startRealWeaponUse" or newStatus=="startZenqiActivation1"):
         launch.step1()
-        time.sleep(2)
+        time.sleep(3.0)
         stopMainVideo()##petq en?
+        startVideo("Step7",isMusic=True)
+        
 
     if(newStatus=="startStep8Video"):##video, voric heto arden piti havaqen kod@
         startVideo("Step8")
     
     if(newStatus=="startWinnerVideo"):##video, voric heto arden piti havaqen kod@
-        startVideo("Winner")
+        startVideo("Winner",False)
 
 
     if(newStatus=="killVideo"):
@@ -163,7 +170,7 @@ dbusNames = ['org.mpris.MediaPlayer2.omxplayer1','org.mpris.MediaPlayer2.omxplay
 players = [omxp, omxp3]
 activePlayer = 0
 lastActivePlayer = 0
-playerVolume = 1.0
+playerVolume = 0.2
 
 p = None
 omxp_thread = {}
@@ -179,8 +186,11 @@ def volumeUp():
     global playerVolume
     if(playerVolume<1):
         playerVolume+=0.05
-        players[activePlayer].set_volume(playerVolume)
-        print(playerVolume)
+        try:    
+            players[activePlayer].set_volume(playerVolume)
+            print(playerVolume)
+        except Exception as err: 
+            print("errorr",err)
     
     
 
@@ -189,8 +199,14 @@ def volumeDown():
     global playerVolume
     if(playerVolume>0):
         playerVolume-=0.05
-        players[activePlayer].set_volume(playerVolume)
-        print(playerVolume)
+        if(playerVolume<0):
+            playerVolume = 0
+        try:    
+            players[activePlayer].set_volume(playerVolume)
+            print(playerVolume)
+        except Exception as err: 
+            print("errorr",err)
+        
     
     
 
@@ -200,7 +216,7 @@ def goStandby():
     global status
     #here will be player
     status = "standby"
-    startSecondMonitor()
+    #startSecondMonitor()
     startVideo("Standby")
     startSecondMonitor("standby-secondary")
 
@@ -209,6 +225,7 @@ def goTurnedOff():
     #here is video, that onnection problems
     status = "turnedoff"
     startSecondMonitor("turnedoff-secondary")
+    
     startVideo("Turnedoff-standby")
     
 
@@ -226,13 +243,16 @@ def player_position_thread(publish_text = "",minimal_position = 3,standby_video=
         
         try:
             if(activePlayer is not called_player):
+                print('aborting actieplayer thread')
                 b=0
+
             if(players[called_player].duration()-players[called_player].position()< minimal_position):#qani varkyana mnacel avartin
                 publish(publish_text)
                 print("publish_text ",publish_text)
                 if(standby_video):
                     print("startVideo from thread",standby_video)
                     startVideo(standby_video,True)
+                print('aborting actieplayer thread after 2s')
                 b=0
             
                 
@@ -244,9 +264,9 @@ def player_position_thread(publish_text = "",minimal_position = 3,standby_video=
             
             print("called player", called_player)
             print("publish_text ",publish_text)
-            print("****err*****", str(err))
+            print("****error video thread*****", str(err))
             return "not ok"
-        
+    return False
             
 
 
@@ -263,7 +283,7 @@ def player_position_thread(publish_text = "",minimal_position = 3,standby_video=
 
 
 
-def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3):
+def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMusic=False):
     global omxp
     global omxp3
     global players
@@ -271,20 +291,28 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3):
     global activePlayer
     global lastActivePlayer
     global playerVolume
-    
+    global notStartVideo
+
+    if(notStartVideo==True):##ete activacrel enq, vor hajord videon chenq cuyc talu, mi angam chenq cuyc talis u gnum enq araj
+        notStartVideo = False
+        return movie_path
+    vargs=""    
+    fileType = "mp4"
     if(platform.system()=="Linux"):
-        
-        VIDEO_PATH = Path("./videos/"+movie_path+".mp4")
+        if(isMusic==True):
+            fileType="mp3"
+        VIDEO_PATH = Path("./videos/"+movie_path+"."+fileType)
         if(not os.path.exists(VIDEO_PATH)):
             print("file", VIDEO_PATH, "not exists")
             return "notok"
         thread_args={"publish_text" : movie_path+"VideoEnded"}
 
-        if(os.path.exists("./videos/"+movie_path+"-Standby.mp4")):
+        if(os.path.exists("./videos/"+movie_path+"-Standby."+fileType)):
             thread_args["standby_video"]=movie_path+"-Standby"
             loop=False##guce heto hanenq
 
-        vargs='--aspect-mode fill --display 2 --no-osd --no-keys -b'
+        if(isMusic==False):
+            vargs+='--aspect-mode fill --display 2 --no-osd --no-keys -b'
 
         if(loop==True):
             vargs+=' --loop'
@@ -309,17 +337,21 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3):
 
 
         if(players[lastActivePlayer] is not None):
-            print("players last active",players[lastActivePlayer],"going to be killed")
-            time.sleep(0.5)
+            #print("players last active",players[lastActivePlayer],"going to be killed")
+            #time.sleep(0.5)
             try:
                 players[lastActivePlayer].stop()
-                omxp_thread[lastActivePlayer].join()
+                omxp_thread[lastActivePlayer].b = 1
                 print("player ",lastActivePlayer,"is killed")
             except Exception as err: 
-                print(err)    
-        players[activePlayer].play()
-        players[activePlayer].set_volume(playerVolume)
-        print(playerVolume)
+                print("lastactive player error",err)    
+        try:                
+            players[activePlayer].play()
+            players[activePlayer].set_volume(playerVolume)
+            # print(playerVolume)
+        except Exception as err:
+            print("activeplayer err",err)
+
     
 
         if(emulationstate==True):
@@ -340,10 +372,11 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3):
         #omxp_thread[activePlayer].start()
         #print("movie_path",movie_path)
         #players[activePlayer].exitEvent += lambda _, exit_code: exitVideoEvent(exit_code,movie_path,activePlayer)
+        if(isMusic==False):
+            omxp_thread[activePlayer] = threading.Thread(target=player_position_thread, kwargs=thread_args )
+        
+            omxp_thread[activePlayer].start()  
 
-        omxp_thread[activePlayer] = threading.Thread(target=player_position_thread, kwargs=thread_args )
-    
-        omxp_thread[activePlayer].start()  
         #omxp_thread[activePlayer].join()  
            
         
@@ -466,11 +499,15 @@ class Launch(QtCore.QObject):
 
     def gamepad_thread(self):
         while True:
-            events = get_gamepad()
-            for event in events:
-                
-                if(event.ev_type=='Key' and event.code=='BTN_THUMB'):
-                    self.buttonPressed.emit(event.state)
+            try:
+                events = get_gamepad()
+                for event in events:
+                    
+                    if(event.ev_type=='Key' and event.code=='BTN_THUMB'):
+                        self.buttonPressed.emit(event.state)
+            except Exception as err:
+                print("gamepad_thread err",err)
+            
                     
     def button_thread(self):
     
@@ -485,7 +522,7 @@ class Launch(QtCore.QObject):
                     GPIO.output(24, False)
                     
         except Exception as err:
-            print("err",err)
+            print("button thread err",err)
             GPIO.cleanup()
 
     # слот
@@ -561,6 +598,7 @@ class Launch(QtCore.QObject):
         self.textInput.setProperty('text', "")
         self.subject.setProperty('sText', "")
         self.root.isWin = False
+        self.step = 1
 
 
     def showBlock(self,block):
@@ -649,7 +687,9 @@ def resetApps():#spanum enq sax hnuc hnaravor e mnacac baner
     os.system('killall omxplayer.bin 2>/dev/null')
 
 
-
+def main_loop(): 
+    while 1:
+      time.sleep(0.1)
 
 if __name__ == '__main__':
     print(sys.argv)
@@ -721,6 +761,12 @@ if __name__ == '__main__':
     #view.show()
 
     app.exec_()
+
+    try:
+        main_loop()
+    except KeyboardInterrupt:
+        print >> sys.stderr, '\nExiting by user request.\n'
+        sys.exit(0)
     sys.exit()
 
 

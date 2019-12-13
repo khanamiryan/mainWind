@@ -32,6 +32,7 @@ devices = {
     "mainPanel":{"status":"standby"},
     "leftPanel":{"status":"standby"},
     "rightPanel":{"status":"standby"},
+    "molorakner":{"status":"standby"},
     "mainDisplay":{"status":"standby"},#todo texapoxel other devices
 
     # "element":{"status":"standby"}
@@ -62,9 +63,7 @@ def on_message(client, userdata, msg):
     message = msg.payload.decode()
     topic = msg.topic
 
-    # print("topic is "+topic)
-    print("message is \""+message+"\"")
-    
+ 
     
     
 
@@ -72,25 +71,30 @@ def on_message(client, userdata, msg):
     if(topic.find("toServer/")==0):#status@ grum enq dictionaryi mej, vor imanananq verjin ekac status@
         dev = topic.replace("toServer/","")
         if(dev in devices and message in statuses):
-          devices[dev]["status"] = message
-
-
-    if(message=="step-3"):
+          setStatus(dev,message) 
+          return True 
+        
+    if(topic != "toServer/molorakner" ):
+        print("topic is "+topic)
+        print("message is \""+message+"\"")
+    
+    if(message=="go-step-2"):
+        startStep2()
+    if(message=="go-step-3"):
+        startStep3()
+    if(message=="go-step-4"):
         startStep4()
-    if(message=="step-4"):
-        startStep4()
-    if(message=="step-5"):
+    if(message=="go-step-5"):
         startStep5()
-    if(message=="step-6"):
-        startStep6()
-    if(message=="step-8"):
-        startStep8()
-    if(message=="step-7"):
-      
+    if(message=="go-step-6"):
+        startStep6()    
+    if(message=="go-step-7"):
         startStep7()
-    if(message=="winner"):
-     
+    if(message=="go-step-8"):
+        startStep8()
+    if(message=="go-winner"):
         winner()
+
         # print("step",newStatus)
         # print ("ssss")
         # stepfunc = message.replace("step-","")
@@ -104,10 +108,10 @@ def on_message(client, userdata, msg):
     if(message=="WelcomeVideoEnded"): #step 1
         startStep2()
 
-    if(message=="FirstVideoEnded"):
-        startStep2()
+    # if(message=="FirstVideoEnded"):
+    #     startStep2()
 
-    if((step==1 or step==2) and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
+    if(step==2 and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
         startStep3()
     if(step==3 and getStatus("balls3")=="finished" and getStatus("larer")=="finished"):
         startStep4()
@@ -125,7 +129,7 @@ def on_message(client, userdata, msg):
         startStep8()
     if(step==8 and  message=="Step8VideoEnded"):
         continueStep8()##patmec, vor moloraker@ xarnvel en, petq banali ta, vor bacen, nayev taqun pahac@
-    if(step==8 and message=="3" and client=="toServer/molorakner"):#?? stugel chisht em grel client@?
+    if(step==8 and message=="5" and topic=="toServer/molorakner"):#?? stugel chisht em grel client@?
         winner()
     if(message=="WinnerVideoEnded"):
         winnerVideoEnded()
@@ -149,17 +153,24 @@ printit()
 
 
 def publish(module,message,device=toDevice):
-    print ("send",message,"to ", device+module)    
+    #print ("send",message,"to ", device+module)
+    #if((message in statuses) and (module in devices)):
+    setStatus(module,message)
     client.publish(device+module, message)
 
 def getStatus(dev):
     return devices[dev]["status"]
 
+def setStatus(dev,status):
+    global devices
+    if(status in statuses and dev in devices):
+        #print("SetStauts", status, "to device", dev)
+        devices[dev]["status"] = status
 def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
     global step, isStarted
     
     publish("ALL","finished")
-
+    
     publish("mainDisplay", "resetBlocks") #0acnum enq glxavor ekrani cragir@
 
     publish("lazer","closeLAZER") #lazer@ anjatum enq
@@ -177,6 +188,7 @@ def startGame():
     
     print("starting the game")
     resetGame()
+    #publish("mainDisplay","notStartVideo")## vorpeszi chmiana finished i videon
     publish("ALL","finished")
 
     publish("mainDisplay","startWelcomeVideo")
@@ -189,6 +201,9 @@ def startStep2():#arajin angam anjatvum sax
     publish("ALL","turnedoff")
     publish("lazer","openLUYS")
     publish("luyser","standby")
+    
+    publish("mainDisplay","notStartVideo")
+    publish("mainDisplay","turnedoff")
     publish("mainDisplay","startFirstVideo")
     
     
@@ -212,11 +227,11 @@ def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
 def startStep4(): #todo es mas@ poxvum a, karchanum a
     global step
     step=4
-    
     publish("mainPanel","standby")
     publish("leftPanel","standby")
     publish("rightPanel","standby")
     time.sleep(2)
+    publish("mainDisplay","notStartVideo")
     publish("mainDisplay","standby")
     publish("mainDisplay","startStep4Video")#ayooo miacanq
     
@@ -262,9 +277,9 @@ def startStep6():#petq a licqavoren zenq@
     step=6
     print("step is 6")
     publish("relener","openD7")#cxi apparat@ miacaca, taqacaca,  miacnum enq cux@
-
+    
     time.sleep(2)
-
+    publish("relener","down") #navsyaki ijacnenq
     publish("lazer","openLUYS")#anjatum en senyaki luyser@
     
     t = threading.Timer(15, stopSmoke)##15 varkyanic cux@ anjatum enq
@@ -282,11 +297,13 @@ def startStep7():##videon mianuma, klaviatiuran barcranuma, erb iranq petq havaq
     publish("mainDisplay","startStep7Video")
     publish("lazer","closeLAZER")
     
+    
     publish("relener","up")
     publish("mainPanel","keyboardActive")
-    time.sleep(3)
-    killvideo()
-    continueStep7()
+    time.sleep(2)
+    publish("lazer","closeLUYS")#anjatum en senyaki luyser@
+    
+    
 
     # publish("klaviatura","startturnedoff") #het qashenq klaviaturan
     # openDoor(1) #bacel 1 magnisov dur@
@@ -319,6 +336,8 @@ def continueStep8():
 
 
 def winner():#haxtecin
+    global step
+    step = 0
     publish("mainDisplay","startWinnerVideo") 
     publish("ALL","finished")
 
