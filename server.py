@@ -141,6 +141,9 @@ def on_message(client, userdata, msg):
     if(message=="keyboardStopped"):#keyboard@ barcracel e
         keyboardStopped()
     
+    if(message=="rebootServer"):
+        os.system('sudo shutdown -r now')
+
 
     
 
@@ -175,6 +178,17 @@ def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
 
     publish("lazer","closeLAZER") #lazer@ anjatum enq
     publish("lazer","closeLUYS")#luyser@ miacnum enq
+
+    publish("relener","closeD6")#cxi apparati anjatum
+    
+    #pakum enq drner@
+    publish("relener","closeD3")
+    publish("relener","closeD4")
+    publish("relener","closeD5")
+    
+    publish("lazer","closeDUR")
+    publish("lazer","closeDRSIDUR")
+
     publish("mainDisplay", "standby")
 
     publish("relener","down")#ijacnum enq klaviarutan
@@ -220,20 +234,25 @@ def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
     time.sleep(5.0) # 5 varkyan heto nor mianan 
     publish("balls3","standby")
     publish("larer","standby")
-    publish("relener","openD3") #gndakner@ amenaaji darakum en, bacum enq
+    publish("relener","openD4") #gndakner@ amenaaji darakum en, bacum enq
     #publish("balonner","standby")#???
 
 
-def startStep4(): #todo es mas@ poxvum a, karchanum a
+def startStep4(): 
     global step
     step=4
+    publish("mainDisplay","startStep4Video")#ayooo miacanq
+
     publish("mainPanel","standby")
     publish("leftPanel","standby")
     publish("rightPanel","standby")
+    
     time.sleep(2)
+    
     publish("mainDisplay","notStartVideo")
     publish("mainDisplay","standby")
-    publish("mainDisplay","startStep4Video")#ayooo miacanq
+
+    publish("relener","openD6")#cxi apparati miacum
     
     
 
@@ -251,7 +270,7 @@ def startStep4(): #todo es mas@ poxvum a, karchanum a
 def startStep5():#erb petq e xax xaxan
     global step
     step=5
-    publish("relener","openD6")#cxi apparati miacum
+    
     publish("mainDisplay","startEmulation")
     t = threading.Timer(150, startStep5Continue)##qani varkyan en xaxum
     t.start()
@@ -260,7 +279,7 @@ def startStep5Continue():#xax@ avartecin asuma, petq a zenqov kraken
     global step
     step=5
     publish("mainDisplay","startFirstWeaponUseVideo")
-    time.sleep(4)
+    time.sleep(3)
     publish("mainDisplay","stopEmulation")
 
 def startFirstWeaponUse():
@@ -325,9 +344,9 @@ def startStep8():
 def continueStep8():
     global step
     step=8
-    publish("relener","openD1")#?
+    #publish("relener","openD1")#?
     time.sleep(0.1)
-    publish("relener","openD2")#?
+    #publish("relener","openD2")#?
     publish("relener","openD5")
     publish("leftPanel","hidden")
     publish("molorakner","standby")##active??

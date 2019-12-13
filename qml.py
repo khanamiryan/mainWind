@@ -92,9 +92,6 @@ def on_message(msg):
         notStartVideo = True#sa darnum a mi angam True, minchev video chlini, vor anjatvi sa
 
     
-   
-
-        
     if(newStatus=="resetBlocks"):
         launch.resetBlocks()
 
@@ -295,7 +292,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
 
     if(notStartVideo==True):##ete activacrel enq, vor hajord videon chenq cuyc talu, mi angam chenq cuyc talis u gnum enq araj
         notStartVideo = False
-        return movie_path
+        return 
     vargs=""    
     fileType = "mp4"
     if(platform.system()=="Linux"):
@@ -534,14 +531,14 @@ class Launch(QtCore.QObject):
             if(text.upper()=="GLC"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
-                self.subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"
+                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը")
                 QtCore.QTimer.singleShot(3000, self.step1)
 
         elif(self.step==2 and len(text)==3):          
             if(text=="163"):
                 QtCore.QTimer.singleShot(500, self.step3)
             else:
-                self.subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"
+                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը")
                 QtCore.QTimer.singleShot(3000, self.step2)
 
         elif(self.step==3):
