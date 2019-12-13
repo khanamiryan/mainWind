@@ -359,10 +359,12 @@ def winner():#haxtecin
     step = 0
     publish("mainDisplay","startWinnerVideo") 
     publish("ALL","finished")
+    time.sleep(8.0)
+    publish("lazer","openDUR")
 
 def winnerVideoEnded():
-    publish("lazer","openDUR")
-    time.sleep(0.1)
+    
+
     publish("lazer","openDRSIDUR")
     time.sleep(5)    
     resetGame()
