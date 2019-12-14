@@ -203,6 +203,7 @@ def startGame():
     print("starting the game")
     resetGame()
     #publish("mainDisplay","notStartVideo")## vorpeszi chmiana finished i videon
+    publish("mainDisplay","notStartVideo")
     publish("ALL","finished")
 
     publish("mainDisplay","startWelcomeVideo")
