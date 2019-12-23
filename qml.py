@@ -106,6 +106,13 @@ def on_message(msg):
 
     if(newStatus=="startStep3Video"):
         startVideo("Step3")
+    
+    if(newStatus=="startStep31Video"):
+        startVideo("Step31")
+
+    if(newStatus=="startStep32Video"):
+        startVideo("Step32")
+
     if(newStatus=="startStep4Video"):
         startVideo("Step4")#sranic heto emulaciana mianym
     
@@ -155,7 +162,14 @@ def on_message(msg):
         volumeDown()
     if(newStatus=="volumeUp"):
         volumeUp()
-        
+    if(newStatus.startswith('volume-')):
+        newvolume = newStatus.replace('volume-','');
+        print("newVoluem",float(newvolume))
+        setVolume(float(newvolume))
+    if(newStatus=="temperature"):
+        temp = os.popen("vcgencmd measure_temp").readline()
+        publish(temp)
+
         
 
 name = "mainDisplay"
@@ -171,6 +185,8 @@ players = [omxp, omxp3]
 activePlayer = 0
 lastActivePlayer = 0
 playerVolume = 0.2
+
+
 
 p = None
 omxp_thread = {}
@@ -189,6 +205,7 @@ def volumeUp():
         try:    
             players[activePlayer].set_volume(playerVolume)
             print(playerVolume)
+            publish("volume-"+str(playerVolume))
         except Exception as err: 
             print("errorr",err)
     
@@ -204,11 +221,20 @@ def volumeDown():
         try:    
             players[activePlayer].set_volume(playerVolume)
             print(playerVolume)
+            publish("volume-"+str(playerVolume))
         except Exception as err: 
             print("errorr",err)
         
     
-    
+def setVolume(newVolume):
+    global playerVolume 
+    playerVolume = newVolume
+    try:    
+        players[activePlayer].set_volume(playerVolume)
+        print(playerVolume)
+        publish("volume-"+str(playerVolume))
+    except Exception as err: 
+        print("errorr",err)
 
 
 
@@ -715,7 +741,7 @@ if __name__ == '__main__':
     
     launch = Launch()
     launch.initQML()
-    client = mqtt.Client(name)
+    client = mqtt.Client(name) 
     #client.connect("192.168.0.100",1883)
     client.connect("127.0.0.1",1883)
     client.on_connect = on_connect
@@ -726,6 +752,8 @@ if __name__ == '__main__':
     stopMainVideo()
     resetApps()
     goStandby() 
+
+    publish("volume-"+str(playerVolume))
     
 
 

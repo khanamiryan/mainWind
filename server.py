@@ -26,6 +26,7 @@ balls3 = "balls3"
 larer = "larer"
 luyser = "luyser"
 step = 0
+step31 = false
 statuses = ["turnedoff","standby","finished","failed","active"]
 devices = {
     "balls3":{"status":"standby"},
@@ -63,6 +64,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     global step
+    global step31
     global isStarted
     global cancel_future_calls
     message = msg.payload.decode()
@@ -79,9 +81,9 @@ def on_message(client, userdata, msg):
           setStatus(dev,message) 
           return True 
         
-    if(topic != "toServer/molorakner" ):
-        print("topic is "+topic)
-        print("message is \""+message+"\"")
+    #if(topic != "toServer/molorakner" ):
+    #    print("topic is "+topic)
+    #    print("message is \""+message+"\"")
     
     if(message=="go-step-2"):
         startStep2()
@@ -120,6 +122,13 @@ def on_message(client, userdata, msg):
 
     if(step==2 and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
         startStep3()
+    if(step==3 and step31==False and getStatus("balls3")=="finished" and getStatus("larer")!="finished"):
+        startStep31()
+        step31 = True
+    if(step==3 and step31==False and getStatus("balls3")!="finished" and getStatus("larer")=="finished"):
+        startStep32()
+        step31 = True
+
     if(step==3 and getStatus("balls3")=="finished" and getStatus("larer")=="finished"):
         startStep4()
     if(step==4 and message=="Step4VideoEnded"):#xosac, asec vor petqa payqaren demetrikusi dem, kraken ev ayln,
@@ -160,6 +169,8 @@ def on_message(client, userdata, msg):
     if(message=="stopSchedule"):
     
         luyseriBlinkStop()
+
+ 
     
     
 
@@ -186,7 +197,7 @@ def setStatus(dev,status):
         #print("SetStauts", status, "to device", dev)
         devices[dev]["status"] = status
 def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
-    global step, isStarted
+    global step, isStarted, step31
     
     publish("ALL","finished")
     
@@ -214,6 +225,7 @@ def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
     
     isStarted=False
     step = 0
+    step31 = False
 
 def startGame():
     global step, isStarted 
@@ -257,7 +269,14 @@ def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
     t = threading.Timer(5, startStep3Timer)##qani varkyan en xaxum
     t.start()
     
-    
+def startStep31():
+    step=3
+    publish("mainDisplay","startStep31Video")
+
+def startStep32():
+    step=3
+    publish("mainDisplay","startStep32Video")
+
     #publish("balonner","standby")#???
 def startStep3Timer():
     publish("balls3","standby")
