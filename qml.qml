@@ -323,6 +323,7 @@ ApplicationWindow {
             
 
             launch.buttonPressFromQml(step,countdown.seconds,isWin)
+            step = 0
     }
     Connections {
         target: launch
