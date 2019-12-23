@@ -110,7 +110,7 @@ def on_message(msg):
         startVideo("Step4")#sranic heto emulaciana mianym
     
     if(newStatus == "startFirstWeaponUseVideo"):#arajin angam zenqi havaqelna, vor traquma zenq@
-        startVideo("FirstWeaponUse",False,minimal_position=2)
+        startVideo("FirstWeaponUse",False)
     if(newStatus == "startFirstWeaponUse"):#arajin angam zenqi havaqelna, vor traquma zenq@        
         launch.step3ForFail()
         stopMainVideo()
@@ -118,7 +118,7 @@ def on_message(msg):
         startVideo("Step6")
         launch.hide()
     if(newStatus=="startStep7Video"):##video, voric heto arden piti havaqen kod@
-        startVideo("Step7")
+        startVideo("Step7",minimal_position=4)
 
     if(newStatus=="startRealWeaponUse" or newStatus=="startZenqiActivation1"):
         launch.step1()
@@ -131,7 +131,7 @@ def on_message(msg):
         startVideo("Step8")
     
     if(newStatus=="startWinnerVideo"):##video, voric heto arden piti havaqen kod@
-        startVideo("Winner",False)
+        startVideo("Winner",False,minimal_position=1)
 
 
     if(newStatus=="killVideo"):
@@ -142,7 +142,10 @@ def on_message(msg):
         startEmulation()
     if(newStatus=="stopEmulation"):
         killEmulation()
-        
+    if(newStatus=="startRetropie"):
+        startRetropie()
+    if(newStatus=="stopRetropie"):
+        stopRetropie()
     
     if(newStatus == "openEmulationMenu"):
        
@@ -240,7 +243,7 @@ def player_position_thread(publish_text = "",minimal_position = 3,standby_video=
         
         try:
             if(activePlayer is not called_player):
-                print('aborting actieplayer thread')
+                print('aborting actieplayer thread',publish_text)
                 b=0
 
             if(players[called_player].duration()-players[called_player].position()< minimal_position):#qani varkyana mnacel avartin
@@ -309,7 +312,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
             loop=False##guce heto hanenq
 
         if(isMusic==False):
-            vargs+='--aspect-mode fill --display 2 --no-osd --no-keys -b'
+            vargs+='--aspect-mode fill --display 2 --no-osd --no-keys -b '
 
         if(loop==True):
             vargs+=' --loop'
@@ -339,7 +342,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
             try:
                 players[lastActivePlayer].stop()
                 omxp_thread[lastActivePlayer].b = 1
-                print("player ",lastActivePlayer,"is killed")
+                print("player ",lastActivePlayer,"is killed"," filename is", players[lastActivePlayer].get_filename())
             except Exception as err: 
                 print("lastactive player error",err)    
         try:                
@@ -389,7 +392,7 @@ def startSecondMonitor(movie_path="standby-secondary",loop=True):
     
     if(platform.system()=="Linux"):
         VIDEO_PATH = Path("./videos/"+movie_path+".mp4")
-        args='--aspect-mode fill --display 7 --no-osd --no-keys -b -o alsa'
+        args='--aspect-mode fill --display 7 --no-osd --no-keys -b -o local'
         if(loop==True):
             args+=' --loop'
         if(omxp2 is None):
@@ -449,6 +452,13 @@ def killEmulation():
         os.system('killall retroarch 2>/dev/null')
     emulationstate = False
 
+def startRetropie():
+    stopMainVideo()
+    killEmulation()
+    p=subprocess.Popen('emulationstation',shell=True)
+def stopRetropie():
+    
+    killEmulation()
 
 def startFirstVideo():
     #here
@@ -531,15 +541,15 @@ class Launch(QtCore.QObject):
             if(text.upper()=="GLC"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
-                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը")
-                QtCore.QTimer.singleShot(3000, self.step1)
+                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ զենքի կոդը")
+                QtCore.QTimer.singleShot(5000, self.step1)
 
         elif(self.step==2 and len(text)==3):          
             if(text=="163"):
                 QtCore.QTimer.singleShot(500, self.step3)
             else:
-                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը")
-                QtCore.QTimer.singleShot(3000, self.step2)
+                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք Դեմետրիկուսի\n գտնվելու վայրը\n 3 թիվ")
+                QtCore.QTimer.singleShot(5000, self.step2)
 
         elif(self.step==3):
             text = ''
@@ -547,13 +557,15 @@ class Launch(QtCore.QObject):
       #..... 
 
     @pyqtSlot(int,int, bool)
-    def buttonPressFromQml(self,qmlStep,qmlSeconds,isWin): ##from qml.qml buttonOrCountdown function
-        print("qmlstep",qmlStep)
-        print ("isWin",isWin)
+    def buttonPressFromQml(self,qmlStep,qmlSeconds,isWin): ##from qml.qml buttonOrCountdown function    
+        
+        # print("qmlstep",qmlStep)
+        # print ("isWin",isWin)
         if(qmlStep==30 and isWin==False): #sexmel en knopkayin arajin krakelu jamanak
             publish("FirstWeaponFailed")
             startVideo()
             QtCore.QTimer.singleShot(500, self.hide)
+            self.changeStep(0)
   
         if(qmlStep==3 and isWin==False):
             publish("RealWeaponUsedFailed")
@@ -562,6 +574,7 @@ class Launch(QtCore.QObject):
         elif(qmlStep==3 and isWin==True): 
             publish("RealWeaponUsedRight")
             QtCore.QTimer.singleShot(5000, self.hide)
+            self.changeStep(0)
 
                     
     def initQML(self):
@@ -595,7 +608,7 @@ class Launch(QtCore.QObject):
         self.textInput.setProperty('text', "")
         self.subject.setProperty('sText', "")
         self.root.isWin = False
-        self.step = 1
+        self.changeStep(0)
 
 
     def showBlock(self,block):
@@ -663,6 +676,7 @@ class Launch(QtCore.QObject):
 
     def hide(self):
         self.root.setProperty('visible',False)
+        self.changeStep(0)
 
 
 
