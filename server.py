@@ -26,7 +26,7 @@ balls3 = "balls3"
 larer = "larer"
 luyser = "luyser"
 step = 0
-step31 = false
+step31 = False
 statuses = ["turnedoff","standby","finished","failed","active"]
 devices = {
     "balls3":{"status":"standby"},
@@ -39,11 +39,12 @@ devices = {
     "rightPanel":{"status":"standby"},
     "molorakner":{"status":"standby"},
     "mainDisplay":{"status":"standby"},#todo texapoxel other devices
+    
 
     # "element":{"status":"standby"}
 
     } #devices with last state
-otherDevices = ["roomLights"]
+otherDevices = ["relener"]
 
 def on_disconnect(client, userdata, rc):
     if rc != 0:
@@ -123,10 +124,11 @@ def on_message(client, userdata, msg):
     if(step==2 and getStatus("luyser")=="finished"):#haxtecin luyser@, ancnnen myus blokin   hin mnacac  and ((topic=="toServer/luyser" and message=="finished") or
         startStep3()
     if(step==3 and step31==False and getStatus("balls3")=="finished" and getStatus("larer")!="finished"):
-        startStep31()
+        startStep32()
         step31 = True
     if(step==3 and step31==False and getStatus("balls3")!="finished" and getStatus("larer")=="finished"):
-        startStep32()
+         
+        startStep31()
         step31 = True
 
     if(step==3 and getStatus("balls3")=="finished" and getStatus("larer")=="finished"):
@@ -152,7 +154,7 @@ def on_message(client, userdata, msg):
 
 
     
-    if(message=="keyboardLiftActive"):
+    if(message=="keyboardLiftActive"):  
         keyboardLiftActive()
     if(message=="keyboardLiftStopped"):#keyboard@ barcracel e kam ijel
         keyboardLiftStopped()
@@ -207,6 +209,7 @@ def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
     publish("lazer","closeLUYS")#luyser@ miacnum enq
 
     publish("relener","closeD6")#cxi apparati anjatum
+    publish("relener","closeD7")##anjatum enq cxi knopken
     
     #pakum enq drner@
     publish("relener","closeD3")
@@ -235,7 +238,7 @@ def startGame():
     print("starting the game")
     resetGame()
     #publish("mainDisplay","notStartVideo")## vorpeszi chmiana finished i videon
-    publish("mainDisplay","notStartVideo")
+    #publish("mainDisplay","notStartVideo")
     publish("ALL","finished")
 
     publish("mainDisplay","startWelcomeVideo")
@@ -330,7 +333,7 @@ def startStep5Continue():#xax@ avartecin asuma, petq a zenqov kraken
     publish("mainDisplay","startFirstWeaponUseVideo")
     
     
-    t = threading.Timer(3, startStep5ContinueTimer)##15 varkyanic cux@ anjatum enq
+    t = threading.Timer(3, startStep5ContinueTimer)
     t.start()
     
     
@@ -344,8 +347,10 @@ def startFirstWeaponUse():
     publish("mainDisplay","startFirstWeaponUse")
 
 def stopSmoke():
-    publish("relener","closeD7")##anjatum enq cxi apparatner@
-    publish("relener","closeD6")
+    publish("relener","closeD7")##anjatum enq cxi knopken
+    
+def stopSmoke2():
+    publish("relener","closeD6")##anjatum enq cxi apparat@
 
 def startStep6():#petq a licqavoren zenq@
     global step
@@ -358,7 +363,10 @@ def startStep6():#petq a licqavoren zenq@
     publish("lazer","openLUYS")#anjatum en senyaki luyser@
     
     t = threading.Timer(15, stopSmoke)##15 varkyanic cux@ anjatum enq
+    
+    t1 = threading.Timer(25, stopSmoke2)##25 varkyanic cuxi apparat@
     t.start()
+    t1.start()
     publish("mainDisplay","startStep6Video")
     
     publish("lazer","openLAZER")#mianuma lazer@

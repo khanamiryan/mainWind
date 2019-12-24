@@ -96,6 +96,7 @@ def on_message(msg):
         launch.resetBlocks()
 
     if(newStatus=="startWelcomeVideo"):
+        print("StartingWelcome")
         startVideo("Welcome",False)        
 
     if(newStatus=="startFirstVideo"):
@@ -256,7 +257,6 @@ def goTurnedOff():
     
 
 
-
 def player_position_thread(publish_text = "",minimal_position = 3,standby_video="",called_player=0):
     global omxp
     global omxp3
@@ -353,7 +353,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
         players[activePlayer] = OMXPlayer(VIDEO_PATH,  
                     dbus_name=dbusNames[activePlayer],args=vargs)
 
-        
+         
         # print("player ",activePlayer,"is activated")
         # print("lastActivePlayer is ",lastActivePlayer)
         thread_args["called_player"]=activePlayer

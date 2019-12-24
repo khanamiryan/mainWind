@@ -151,8 +151,11 @@ ApplicationWindow {
                     font.capitalization: Font.AllUppercase
                     font.pixelSize: 50
                     maximumLength:3
+                 
                     onTextEdited:{
+                        // textInput.text.
                         
+                        textInput.text = textInput.text.replace(/\!/g, '1').replace(/\@/g, '2').replace(/\"/g, '2').replace(/\#/g, '3').replace(/\£/g, '3').replace(/\$/g, '4').replace(/\$/g, '4').replace(/\%/g, '5').replace(/\^/g, '6').replace(/\&/g, '7').replace(/\*/g, '8').replace(/\(/g, '9').replace(/\)/g, '0');
                         launch.textEdited(textInput.text)
                         //weaponCodeBlock.text = textInput.text
                     }
@@ -330,6 +333,7 @@ ApplicationWindow {
 
         // Обработчик сигнала 
         onTextEdit: {
+            
 
             if(step==1)
                 weaponCodeBlock.text = text
