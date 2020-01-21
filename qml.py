@@ -338,8 +338,9 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
             loop=False##guce heto hanenq
 
         if(isMusic==False):
-            vargs+='--aspect-mode fill --display 2 --no-osd --no-keys -b '
-
+            vargs+='--aspect-mode fill --display 2 --no-osd --no-keys -b -o local'
+        else:
+            vargs+=' -o local'
         if(loop==True):
             vargs+=' --loop'
         
@@ -418,7 +419,7 @@ def startSecondMonitor(movie_path="standby-secondary",loop=True):
     
     if(platform.system()=="Linux"):
         VIDEO_PATH = Path("./videos/"+movie_path+".mp4")
-        args='--aspect-mode fill --display 7 --no-osd --no-keys -b -o local'
+        args='--aspect-mode fill --display 7 --no-osd --no-keys -b -o hdmi'
         if(loop==True):
             args+=' --loop'
         if(omxp2 is None):
@@ -564,7 +565,7 @@ class Launch(QtCore.QObject):
         self.textEdit.emit(text, self.step)
         if(self.step == 1 and len(text)==3):
             
-            if(text.upper()=="GLC"):##nayev mecatar
+            if(text.upper()=="GLC" or text.upper()=="AIL"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
                 self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ զենքի կոդը")
