@@ -285,8 +285,11 @@ def startStep32():
 def startStep3Timer():
     publish("balls3","standby")
     publish("larer","standby")
+    d = threading.Timer(5, openD4)##qani varkyan en xaxum
+    d.start()
+    
+def openD4():
     publish("relener","openD4") #gndakner@ amenaaji darakum en, bacum enq
-
 def startStep4(): 
     global step
     step=4

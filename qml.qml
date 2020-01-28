@@ -308,7 +308,7 @@ ApplicationWindow {
             
             if(step==3&&!isWin){
                 if(!fromCountdown&&pressed&&countdown.seconds>0){
-                    if(weaponCodeBlock.text.toUpperCase()=="GLC"&&coordinatesBlock.text=="163"){
+                    if((weaponCodeBlock.text.toUpperCase()=="GLC"||weaponCodeBlock.text.toUpperCase()=="AIL")&&coordinatesBlock.text=="163"){
                         subject.sText = "Այոոոո"
                         countdown.stop()
                         isWin = true
