@@ -364,6 +364,7 @@ def startStep6():#petq a licqavoren zenq@
     
     publish("relener","down") #navsyaki ijacnenq
     publish("lazer","openLUYS")#anjatum en senyaki luyser@
+    publish("lazer","openUV")
     
     t = threading.Timer(15, stopSmoke)##15 varkyanic cux@ anjatum enq
     
@@ -410,17 +411,19 @@ def continueStep7():##petq a arden havaqen kod@
     global step
     step=7
     luyseriBlinkStart()
+    
     publish("mainDisplay","startRealWeaponUse")
 
 def startStep8():
     global step
     step=8
+    publish("lazer","closeUV")
     luyseriBlinkStop()
     publish("mainDisplay","startStep8Video")
     publish("relener","down")
     publish("mainPanel","keyboardLiftActive")
     publish("lazer","closeLUYS")#miacnum en senyaki luyser@
-    t = threading.Timer(8, continueStep8)##qani varkyan en xaxum
+    t = threading.Timer(40, continueStep8)##qani varkyan en xaxum
     t.start()
     
     

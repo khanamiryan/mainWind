@@ -155,6 +155,9 @@ def on_message(msg):
     if(newStatus=="stopRetropie"):
         stopRetropie()
     
+    if(newStatus == "stopZenqiActivationDisplay"):
+        launch.hide()
+
     if(newStatus == "openEmulationMenu"):
        
         openEmulationMenu()
@@ -185,7 +188,7 @@ dbusNames = ['org.mpris.MediaPlayer2.omxplayer1','org.mpris.MediaPlayer2.omxplay
 players = [omxp, omxp3]
 activePlayer = 0
 lastActivePlayer = 0
-playerVolume = 0.2
+playerVolume = 1
 
 
 
@@ -265,7 +268,7 @@ def player_position_thread(publish_text = "",minimal_position = 3,standby_video=
     
     b = 1 
     while b==1:
-        # try omxp
+        # try omxp 
         
         try:
             if(activePlayer is not called_player):
@@ -337,18 +340,20 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
             thread_args["standby_video"]=movie_path+"-Standby"
             loop=False##guce heto hanenq
 
+     
         if(isMusic==False):
-            vargs+='--aspect-mode fill --display 2 --no-osd --no-keys -b -o local'
+            vargs+=' -o local  --aspect-mode fill --display 2 --no-osd --no-keys -b  '
         else:
-            vargs+=' -o local'
+            vargs+=' -o local '
+            
         if(loop==True):
-            vargs+=' --loop'
+            vargs+=' --loop '
         
         if(lastActivePlayer == activePlayer):
             activePlayer = 0 #arajin angamna
         else:
             activePlayer = int(not activePlayer)
-        
+         
         lastActivePlayer = int(not activePlayer)
         
         players[activePlayer] = OMXPlayer(VIDEO_PATH,  
@@ -805,6 +810,7 @@ if __name__ == '__main__':
     try:
         main_loop()
     except KeyboardInterrupt:
+        resetApps()
         print >> sys.stderr, '\nExiting by user request.\n'
         sys.exit(0)
     sys.exit()
