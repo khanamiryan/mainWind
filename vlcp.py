@@ -1,18 +1,32 @@
-"""Simple example showing how to get gamepad events."""
+import vlc
+import time
+import sys
+import platform
 
-from __future__ import print_function
+from PyQt5.QtWidgets import QApplication, QFrame,QMacCocoaViewContainer
 
-
-from inputs import get_gamepad
-
-
-def main():
-    """Just print out some event infomation when the gamepad is used."""
-    while 1:
-        events = get_gamepad()
-        for event in events:
-            print(event.ev_type, event.code, event.state)
+Instance = vlc.Instance('--fullscreen')
+player = Instance.media_player_new()
 
 
-if __name__ == "__main__":
-    main()
+
+  
+url = '/Users/Ashot/Desktop/galaktikus/valerian.mp4'
+
+Media = Instance.media_new(url)
+player.set_media(Media)
+
+
+import sys
+vlcApp =QApplication(sys.argv)
+if platform.system() == "Darwin": # for MacOS
+    videoframe = QMacCocoaViewContainer(0)
+else:
+    videoframe = QFrame()
+
+videoframe.resize(700,700)
+videoframe.show()
+player.set_nsobject(int(videoframe.winId()))
+player.play()
+while True:
+     pass
