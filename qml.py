@@ -71,11 +71,12 @@ def publish(message,device="toServer/mainDisplay"):
 
 notStartVideo = False ##sa nra hamar e, vor erb vor petq chi inch hajord videon miacnel, bayc status@ petqa, asenq standby gnaluc ev ayln
 
-
+lastVideoName = "";
 def on_message(msg):
     
     global status
     global notStartVideo
+    global lastVideoName
 
     newStatus = msg.payload.decode()
     topic = msg.topic
@@ -131,8 +132,26 @@ def on_message(msg):
     if(newStatus=="startRealWeaponUse" or newStatus=="startZenqiActivation1"):
         launch.step1()
         time.sleep(3.0)
+        # players[activePlayer].set_alpha(0)
+        
         stopMainVideo()##petq en?
         startVideo("Step7",isMusic=True)
+    
+
+    if("molorakner-" in newStatus):
+        moloraknerCount = int(newStatus.replace("molorakner-", ""))
+        
+
+        if(moloraknerCount==0):
+            if(launch.moloraknerActivated==True):
+                startVideo(lastVideoName)
+            launch.stepMolorakner(0)
+        elif(moloraknerCount>0 and moloraknerCount<5):            
+            if(launch.moloraknerActivated==False):
+                lastVideoName = players[activePlayer].file_name
+                stopMainVideo()
+            launch.stepMolorakner(moloraknerCount)
+
         
 
     if(newStatus=="startStep8Video"):##video, voric heto arden piti havaqen kod@
@@ -177,8 +196,6 @@ def on_message(msg):
         
 
 name = "mainDisplay"
-
-
 
 
 omxp = None
@@ -327,6 +344,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
         return 
     vargs=""    
     fileType = "mp4"
+    
     if(platform.system()=="Linux"):
         if(isMusic==True):
             fileType="mp3"
@@ -359,6 +377,8 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
         players[activePlayer] = OMXPlayer(VIDEO_PATH,  
                     dbus_name=dbusNames[activePlayer],args=vargs)
 
+        players[activePlayer].file_name = movie_path
+
          
         # print("player ",activePlayer,"is activated")
         # print("lastActivePlayer is ",lastActivePlayer)
@@ -380,6 +400,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
         try:                
             players[activePlayer].play()
             players[activePlayer].set_volume(playerVolume)
+            
             # print(playerVolume)
         except Exception as err:
             print("activeplayer err",err)
@@ -449,7 +470,6 @@ def openEmulationMenu():
 def stopMainVideo():
     global players
     global activePlayer
-
     try:
         if(players[activePlayer] is not None):
             players[activePlayer].stop()
@@ -516,7 +536,7 @@ class Launch(QtCore.QObject):
     def __init__(self):
         QtCore.QObject.__init__(self)
         self.view = QQmlApplicationEngine()
-        
+        self.moloraknerActivated = False
         self.step = 1
         self.buttonState = False
 
@@ -624,6 +644,12 @@ class Launch(QtCore.QObject):
         self.coordinatesBlock = self.findQmlByObjectCode('coordinatesBlock')
         #self.coordinatesText = self.findQmlByObjectCode('coordinatesText')
         self.fireBlock = self.findQmlByObjectCode('fireBlock')
+
+        self.molorakner = self.findQmlByObjectCode('molorakner')
+        self.moloraknerCount = self.findQmlByObjectCode('moloraknerCount')
+        self.mainBlock = self.findQmlByObjectCode('mainBlock')
+
+        self.resetBlocks()
         
         
     def findQmlByObjectCode(self,objectCode):
@@ -631,16 +657,19 @@ class Launch(QtCore.QObject):
         return self.view.rootObjects()[0].findChild(QtCore.QObject, objectCode)
 
     def resetBlocks(self):
-        self.hideBlock(self.weaponCodeBlock)
+        self.hideBlock(self.weaponCodeBlock) 
         self.hideBlock(self.coordinatesBlock)
         self.hideBlock(self.fireBlock)
         self.weaponCodeBlock.setProperty('text', "")
         self.coordinatesBlock.setProperty('text', "")
         self.fireBlock.setProperty('text', "")
         self.textInput.setProperty('text', "")
-        self.subject.setProperty('sText', "")
+        self.subject.setProperty('sText', "") 
         self.root.isWin = False
         self.changeStep(0)
+
+        self.mainBlock.setProperty('visible',True)
+        self.molorakner.setProperty('visible',False)
 
 
     def showBlock(self,block):
@@ -648,6 +677,7 @@ class Launch(QtCore.QObject):
 
     def hideBlock(self,block):
        block.setProperty('stateVisible',0)
+        
     def changeStep(self,nstep,text=''):
         self.step = nstep
         self.root.setProperty('step',nstep)
@@ -668,6 +698,7 @@ class Launch(QtCore.QObject):
         self.subject.setProperty('sText', "Հավաքեք զենքի կոդը")
 
     def step2(self):
+        self.molorakner.setProperty('visible',False)
         self.root.setProperty('visible',True)
         self.root.showFullScreen()
         self.changeStep(2)
@@ -682,6 +713,7 @@ class Launch(QtCore.QObject):
 
 
     def step3(self):
+        self.molorakner.setProperty('visible',False)
         self.root.setProperty('visible',True)
         self.root.showFullScreen()
         self.changeStep(3)
@@ -692,7 +724,8 @@ class Launch(QtCore.QObject):
         self.subject.setProperty('sText', "Սեղմեք կրակելու կոճակը")
         
     def step3ForFail(self):
-        print("going to ","step3ForFail","function")
+        self.molorakner.setProperty('visible',False)
+        
         self.changeStep(30)
         #self.findQmlByObjectCode('countdown').
         self.hideBlock(self.weaponCodeBlock)
@@ -705,6 +738,21 @@ class Launch(QtCore.QObject):
         self.root.setProperty('visible',True)
         self.root.showFullScreen() 
 
+
+    def stepMolorakner(self,count):
+        
+        if(count>0):
+            self.moloraknerActivated = True
+            self.root.setProperty('visible',True)
+            self.mainBlock.setProperty('visible',False)
+            self.root.showFullScreen()
+            self.molorakner.setProperty('visible',True)
+            self.moloraknerCount.setProperty('jText', count)
+        else:
+            if(self.moloraknerActivated==True):
+                self.resetBlocks()
+                self.moloraknerActivated = False
+                
 
     def hide(self):
         self.root.setProperty('visible',False)
