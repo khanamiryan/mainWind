@@ -211,6 +211,8 @@ def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
     publish("lazer","closeLAZER") #lazer@ anjatum enq
     publish("lazer","closeLUYS")#luyser@ miacnum enq
 
+    publish("lazer","closeUV")
+
     publish("relener","closeD6")#cxi apparati anjatum
     publish("relener","closeD7")##anjatum enq cxi knopken
     
@@ -382,7 +384,7 @@ def startStep6():#petq a licqavoren zenq@
     publish("relener","openD3") #hayelineri darak@
 
 
-    publish("mainPanel","turnedoff")
+    
     publish("leftPanel","turnedoff")
     publish("rightPanel","turnedoff")
     publish("larer","turnedoff")
@@ -429,7 +431,7 @@ def startStep8():
     global step
     step=8
 
-    publish("mainPanel","standby")
+    
     publish("leftPanel","standby")
     publish("rightPanel","standby")
     publish("larer","finished")

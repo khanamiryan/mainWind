@@ -590,7 +590,7 @@ class Launch(QtCore.QObject):
         self.textEdit.emit(text, self.step)
         if(self.step == 1 and len(text)==3):
             
-            if(text.upper()=="GLC" or text.upper()=="AIL"):##nayev mecatar
+            if(text.upper()=="AIL"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
                 self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ զենքի կոդը")
