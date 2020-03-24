@@ -22,7 +22,7 @@ ApplicationWindow {
     height: 600
     
     
-    flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint 
+    flags: Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint
     onStepChanged: {
         console.log(mainWindow.step)
         if(step===3)
@@ -52,12 +52,67 @@ ApplicationWindow {
     property int previousX
     property int previousY
 
+    Item {
+        id: molorakner
+        anchors.fill: parent
+        objectName: "molorakner"
+         Text {
+                id: moloraknerCount
+                objectName: "moloraknerCount"
+                anchors.fill:parent
+                x: 0
+                y: 0
+                
+                color: "#ffffff"
+                font.family: "GHEA Grapalat"
 
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize: 150
+                
+            
+                property string jText: "s"
+                // ### Important part ###
+                text: jText
+                Behavior on jText {
+                    FadeAnimation {
+                        target: moloraknerCount
+                    }
+                }
+                // ######################
+     
+
+            }
+             Text {
+                
+        
+                
+                
+                y:200
+                width:parent.width
+                color: "#ffffff"
+                font.family: "GHEA Grapalat"
+
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize: 50
+                
+            
+                
+                // ### Important part ###
+                text: "Ճիշտ մոլորակների քանակը"
+                
+                // ######################
+
+
+            }
+            
+    }
 
     Item {
 
         id: element
-
+        objectName: "mainBlock"
         antialiasing: true
         width: 750
         height: 500
@@ -308,7 +363,7 @@ ApplicationWindow {
             
             if(step==3&&!isWin){
                 if(!fromCountdown&&pressed&&countdown.seconds>0){
-                    if((weaponCodeBlock.text.toUpperCase()=="GLC"||weaponCodeBlock.text.toUpperCase()=="AIL")&&coordinatesBlock.text=="163"){
+                    if((weaponCodeBlock.text.toUpperCase()=="GjAAC"||weaponCodeBlock.text.toUpperCase()=="AIL")&&coordinatesBlock.text=="163"){
                         subject.sText = "Այոոոո"
                         countdown.stop()
                         isWin = true

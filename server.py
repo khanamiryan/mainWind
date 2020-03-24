@@ -149,6 +149,9 @@ def on_message(client, userdata, msg):
         #continueStep8()##patmec, vor moloraker@ xarnvel en, petq banali ta, vor bacen, nayev taqun pahac@
     if(step==8 and message=="5" and topic=="toServer/molorakner"):#?? stugel chisht em grel client@?
         winner()
+    if(topic=="toServer/molorakner"):
+        publish("mainDisplay","molorakner-"+message)
+        # print ("molorakner-"+message)
     if(message=="WinnerVideoEnded"):
         winnerVideoEnded()
 
@@ -207,6 +210,8 @@ def resetGame():#mianum a amenaskzbum, erb uxxaki der chi sksel xax@
 
     publish("lazer","closeLAZER") #lazer@ anjatum enq
     publish("lazer","closeLUYS")#luyser@ miacnum enq
+
+    publish("lazer","closeUV")
 
     publish("relener","closeD6")#cxi apparati anjatum
     publish("relener","closeD7")##anjatum enq cxi knopken
@@ -377,6 +382,14 @@ def startStep6():#petq a licqavoren zenq@
     publish("mainDisplay","lazerTime")#mianuma lazer@, dra hamar ampulaner@ piti hatuk dzev linen
     publish("mainPanel","lazerTime")#mianuma lazer@, dra hamar ampulaner@ piti hatuk dzev linen
     publish("relener","openD3") #hayelineri darak@
+
+
+    
+    publish("leftPanel","turnedoff")
+    publish("rightPanel","turnedoff")
+    publish("larer","turnedoff")
+    publish("luyser","turnedoff")
+    publish("balls3","turnedoff")
     
 
 def startStep7():##videon mianuma, klaviatiuran barcranuma, erb iranq petq havaqen chisht kod@
@@ -417,6 +430,16 @@ def continueStep7():##petq a arden havaqen kod@
 def startStep8():
     global step
     step=8
+
+    
+    publish("leftPanel","standby")
+    publish("rightPanel","standby")
+    publish("larer","finished")
+    publish("luyser","finished")
+    publish("balls3","finished")
+    
+
+    
     publish("lazer","closeUV")
     luyseriBlinkStop()
     publish("mainDisplay","startStep8Video")
