@@ -462,9 +462,11 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
 
 def startSecondMonitor(movie_path="standby-secondary",loop=True):
     global omxp2 
+
     
     if(platform.system()=="Linux"):
         VIDEO_PATH = Path(mainPath+movie_path+".mp4")
+        print(VIDEO_PATH)
         args='--aspect-mode fill --display 7 --no-osd --no-keys -b -o hdmi'
         if(loop==True):
             args+=' --loop'
@@ -796,6 +798,8 @@ def hideShow(r):
 def resetApps():#spanum enq sax hnuc hnaravor e mnacac baner
     os.system('killall omxplayer 2>/dev/null')
     os.system('killall omxplayer.bin 2>/dev/null')
+
+import sys
 
 
 def main_loop(): 
