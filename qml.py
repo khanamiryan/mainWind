@@ -53,17 +53,29 @@ from PyQt5.QtQuick import QQuickView
  
 redirectory = "/home/pi/"
 
+lang  = "arm"
+mainPath = "./videos/"+lang+"/"
+
+def changeLanguage(newLang):
+    global mainPath, lang
+    
+    if(os.path.exists("./videos/"+newLang+"/")):
+        mainPath = "./videos/"+newLang+"/"
+        lang = newLang
+        publish("changeLanguage"+lang.capitalize())
+
 
 global status
 status = "standby"
 def on_connect(client, userdata, flags, rc):#
+    global lang
     print("Connected with result code "+str(rc))
     client.subscribe("toDevice/mainDisplay")
     #pordznakan anjatenq all@
     #client.subscribe("toDevice/ALL") 
     client.publish("toServer/mainDisplay", payload='hello', qos=0, retain=False)
     client.publish("toServer/mainDisplay", payload=status, qos=0, retain=False)
-
+    changeLanguage(lang)
 
 
 def publish(message,device="toServer/mainDisplay"):
@@ -192,6 +204,13 @@ def on_message(msg):
     if(newStatus=="temperature"):
         temp = os.popen("vcgencmd measure_temp").readline()
         publish(temp)
+    
+    if(newStatus=="changeLanguageRus"):
+        changeLanguage("rus")
+        
+    if(newStatus=="changeLanguageArm"):
+        changeLanguage("arm")
+
 
         
 
@@ -338,6 +357,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
     global lastActivePlayer
     global playerVolume
     global notStartVideo
+    global mainPath
 
     if(notStartVideo==True):##ete activacrel enq, vor hajord videon chenq cuyc talu, mi angam chenq cuyc talis u gnum enq araj
         notStartVideo = False
@@ -348,13 +368,13 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
     if(platform.system()=="Linux"):
         if(isMusic==True):
             fileType="mp3"
-        VIDEO_PATH = Path("./videos/"+movie_path+"."+fileType)
+        VIDEO_PATH = Path(mainPath + movie_path+"."+fileType)
         if(not os.path.exists(VIDEO_PATH)):
             print("file", VIDEO_PATH, "not exists")
             return "notok"
         thread_args={"publish_text" : movie_path+"VideoEnded"}
 
-        if(os.path.exists("./videos/"+movie_path+"-Standby."+fileType)):
+        if(os.path.exists(mainPath + movie_path+"-Standby."+fileType)):
             thread_args["standby_video"]=movie_path+"-Standby"
             loop=False##guce heto hanenq
 
@@ -442,9 +462,11 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
 
 def startSecondMonitor(movie_path="standby-secondary",loop=True):
     global omxp2 
+
     
     if(platform.system()=="Linux"):
-        VIDEO_PATH = Path("./videos/"+movie_path+".mp4")
+        VIDEO_PATH = Path(mainPath+movie_path+".mp4")
+        print(VIDEO_PATH)
         args='--aspect-mode fill --display 7 --no-osd --no-keys -b -o hdmi'
         if(loop==True):
             args+=' --loop'
@@ -777,6 +799,8 @@ def hideShow(r):
 def resetApps():#spanum enq sax hnuc hnaravor e mnacac baner
     os.system('killall omxplayer 2>/dev/null')
     os.system('killall omxplayer.bin 2>/dev/null')
+
+import sys
 
 
 def main_loop(): 
