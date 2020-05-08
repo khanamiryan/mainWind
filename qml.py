@@ -71,7 +71,7 @@ def publish(message,device="toServer/mainDisplay"):
 
 notStartVideo = False ##sa nra hamar e, vor erb vor petq chi inch hajord videon miacnel, bayc status@ petqa, asenq standby gnaluc ev ayln
 
-lastVideoName = "";
+lastVideoName = ""
 def on_message(msg):
     
     global status
@@ -186,7 +186,7 @@ def on_message(msg):
     if(newStatus=="volumeUp"):
         volumeUp()
     if(newStatus.startswith('volume-')):
-        newvolume = newStatus.replace('volume-','');
+        newvolume = newStatus.replace('volume-','')
         print("newVoluem",float(newvolume))
         setVolume(float(newvolume))
     if(newStatus=="temperature"):
@@ -531,6 +531,7 @@ def startStep4FailedVideo():
 
 
 
+
  
 class Launch(QtCore.QObject):
     def __init__(self):
@@ -770,7 +771,7 @@ def hideShow(r):
      #r.setProperty('visible', not visible)
 
      t = threading.Timer(2.0, hideShow, [r])
-     t.start();
+     t.start()
 
 
 def resetApps():#spanum enq sax hnuc hnaravor e mnacac baner
@@ -862,7 +863,3 @@ if __name__ == '__main__':
         print >> sys.stderr, '\nExiting by user request.\n'
         sys.exit(0)
     sys.exit()
-
-
-
-    
