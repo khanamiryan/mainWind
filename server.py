@@ -175,9 +175,6 @@ def on_message(client, userdata, msg):
     
         luyseriBlinkStop()
 
- 
-    
-    
 
 
 def printit():

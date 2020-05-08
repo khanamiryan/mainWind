@@ -389,7 +389,6 @@ ApplicationWindow {
         // Обработчик сигнала 
         onTextEdit: {
             
-
             if(step==1)
                 weaponCodeBlock.text = text
             else if(step==2)

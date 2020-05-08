@@ -6,6 +6,9 @@ import os
 import subprocess 
 import threading
 
+import strings#language file
+
+
 import platform
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -54,6 +57,9 @@ from PyQt5.QtQuick import QQuickView
 redirectory = "/home/pi/"
 
 lang  = "arm"
+
+text = getattr(strings,lang)
+
 mainPath = "./videos/"+lang+"/"
 
 def changeLanguage(newLang):
@@ -616,14 +622,14 @@ class Launch(QtCore.QObject):
             if(text.upper()=="AIL"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
-                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ զենքի կոդը")
+                self.subject.setProperty('sText', text["err_weapon_code"])
                 QtCore.QTimer.singleShot(5000, self.step1)
 
         elif(self.step==2 and len(text)==3):          
             if(text=="163"):
                 QtCore.QTimer.singleShot(500, self.step3)
             else:
-                self.subject.setProperty('sText', "Տեղի ունեցավ սխալ:\nՄուտքագրեք Դեմետրիկուսի\n գտնվելու վայրը\n 3 թիվ")
+                self.subject.setProperty('sText', text["err_coordinates"])
                 QtCore.QTimer.singleShot(5000, self.step2)
 
         elif(self.step==3):
@@ -718,7 +724,7 @@ class Launch(QtCore.QObject):
         self.hideBlock(self.coordinatesBlock)
         self.hideBlock(self.fireBlock)
 
-        self.subject.setProperty('sText', "Հավաքեք զենքի կոդը")
+        self.subject.setProperty('sText', text["type_weapon_code"])
 
     def step2(self):
         self.molorakner.setProperty('visible',False)
@@ -732,7 +738,7 @@ class Launch(QtCore.QObject):
         self.showBlock(self.coordinatesBlock)
         self.hideBlock(self.fireBlock)
 
-        self.subject.setProperty('sText', "Մուտքագրեք կոորդինատները")
+        self.subject.setProperty('sText', text["type_coordinates"])
 
 
     def step3(self):
@@ -744,7 +750,7 @@ class Launch(QtCore.QObject):
         self.showBlock(self.weaponCodeBlock)
         self.showBlock(self.coordinatesBlock)
         self.showBlock(self.fireBlock)
-        self.subject.setProperty('sText', "Սեղմեք կրակելու կոճակը")
+        self.subject.setProperty('sText', text["press_button"])
         
     def step3ForFail(self):
         self.molorakner.setProperty('visible',False)
@@ -756,7 +762,7 @@ class Launch(QtCore.QObject):
         self.hideBlock(self.fireBlock)
         
         #self.showBlock(self.fireBlock)
-        self.subject.setProperty('sText', "Սեղմեք կրակելու կոճակը")
+        self.subject.setProperty('sText', text["press_button"])
         
         self.root.setProperty('visible',True)
         self.root.showFullScreen() 
