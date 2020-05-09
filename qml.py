@@ -56,19 +56,22 @@ from PyQt5.QtQuick import QQuickView
  
 redirectory = "/home/pi/"
 
-lang  = "arm"
+lang  = "rus"
 
 text = getattr(strings,lang)
 
 mainPath = "./videos/"+lang+"/"
 
 def changeLanguage(newLang):
-    global mainPath, lang
+    global mainPath, lang, text
+
+    text = getattr(strings,lang)
     
     if(os.path.exists("./videos/"+newLang+"/")):
         mainPath = "./videos/"+newLang+"/"
         lang = newLang
         publish("changeLanguage"+lang.capitalize())
+        launch.changeLanguage(lang)
 
 
 global status
@@ -183,7 +186,6 @@ def on_message(msg):
         stopMainVideo()
         
     if(newStatus=="startEmulation"):
-
         startEmulation()
     if(newStatus=="stopEmulation"):
         killEmulation()
@@ -204,7 +206,7 @@ def on_message(msg):
     if(newStatus=="volumeUp"):
         volumeUp()
     if(newStatus.startswith('volume-')):
-        newvolume = newStatus.replace('volume-','')
+        newvolume = newStatus.replace('volume-',"")
         print("newVoluem",float(newvolume))
         setVolume(float(newvolume))
     if(newStatus=="temperature"):
@@ -569,6 +571,10 @@ class Launch(QtCore.QObject):
         self.step = 1
         self.buttonState = False
 
+        self.translator =  QtCore.QTranslator()
+        
+
+
         button_t = threading.Thread(target=self.button_thread, args=())    
         button_t.start()
     
@@ -595,6 +601,7 @@ class Launch(QtCore.QObject):
                         self.buttonPressed.emit(event.state)
             except Exception as err:
                 print("gamepad_thread err",err)
+                time.sleep(100)
             
                     
     def button_thread(self):
@@ -633,9 +640,10 @@ class Launch(QtCore.QObject):
                 QtCore.QTimer.singleShot(5000, self.step2)
 
         elif(self.step==3):
-            text = ''
+            text = ""
         
       #..... 
+
 
     @pyqtSlot(int,int, bool)
     def buttonPressFromQml(self,qmlStep,qmlSeconds,isWin): ##from qml.qml buttonOrCountdown function    
@@ -656,7 +664,21 @@ class Launch(QtCore.QObject):
             publish("RealWeaponUsedRight")
             QtCore.QTimer.singleShot(5000, self.hide)
             self.changeStep(0)
+    def changeLanguage(self, language):
+        print("launch, changelanguage"+language)
+        if(language == "rus"):
+            base_path = os.path.abspath(".")
+            path = os.path.join(base_path, 't1_rus.qm')
+            self.translator.load(path)
+            app.installTranslator(self.translator)
+            print(app)
+        
 
+        if(language =="arm"):
+            app.removeTranslator(self.translator)
+        
+
+  
                     
     def initQML(self):
         
@@ -707,7 +729,7 @@ class Launch(QtCore.QObject):
     def hideBlock(self,block):
        block.setProperty('stateVisible',0)
         
-    def changeStep(self,nstep,text=''):
+    def changeStep(self,nstep,text=""):
         self.step = nstep
         self.root.setProperty('step',nstep)
         self.textInput.setProperty('text', text)
@@ -780,6 +802,7 @@ class Launch(QtCore.QObject):
         else:
             if(self.moloraknerActivated==True):
                 self.resetBlocks()
+                self.hide()# petq a stugel, askhatuma te ch
                 self.moloraknerActivated = False
                 
 

@@ -84,10 +84,7 @@ ApplicationWindow {
 
             }
              Text {
-                
-        
-                
-                
+
                 y:200
                 width:parent.width
                 color: "#ffffff"
@@ -100,8 +97,8 @@ ApplicationWindow {
             
                 
                 // ### Important part ###
-                text: "Ճիշտ մոլորակների քանակը"
-                
+                text: qsTr("Ճիշտ մոլորակների քանակը")
+                                
                 // ######################
 
 
@@ -357,24 +354,24 @@ ApplicationWindow {
             if (fromCountdown === undefined) fromCountdown = false
             if(pressed&&step==30){
                 
-                    subject.sText = "FATAL ERROR\nՏեղի է ունեցել սխալմունք"
+                    subject.sText = qsTr("FATAL ERROR\nՏեղի է ունեցել սխալմունք")
                     isWin = false
             }
             
             if(step==3&&!isWin){
                 if(!fromCountdown&&pressed&&countdown.seconds>0){
                     if((weaponCodeBlock.text.toUpperCase()=="GjAAC"||weaponCodeBlock.text.toUpperCase()=="AIL")&&coordinatesBlock.text=="163"){
-                        subject.sText = "Այոոոո"
+                        subject.sText = qsTr("Այոոոո")
                         countdown.stop()
                         isWin = true
                     }
                     else{
-                        subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"
+                        subject.sText = qsTr("Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը")
                         countdown.stop()
                         isWin = false
                     }
                 }else{
-                    subject.sText = "Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը"//chen sexmel knopken
+                    subject.sText = qsTr("Տեղի ունեցավ սխալ:\nՄուտքագրեք ճիշտ տվյալներ\n և սեղմեք կարմիր կոճակը")//chen sexmel knopken
                     isWin = false
                 }
             }
