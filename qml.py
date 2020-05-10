@@ -447,25 +447,13 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
         
             
             
-        
-        #print(thread_args)
-
-
-       # omxp_thread[activePlayer] = threading.Timer(players[activePlayer].duration()-3,timer_video, kwargs=thread_args)
-        #omxp_thread[activePlayer].start()
-        #print("movie_path",movie_path)
-        #players[activePlayer].exitEvent += lambda _, exit_code: exitVideoEvent(exit_code,movie_path,activePlayer)
+      
         if(isMusic==False):
             omxp_thread[activePlayer] = threading.Thread(target=player_position_thread, kwargs=thread_args )
         
             omxp_thread[activePlayer].start()  
 
-        #omxp_thread[activePlayer].join()  
-           
-        
-        # if(omxp_thread[lastActivePlayer] and omxp_thread[lastActivePlayer].is_alive()):
-        #     omxp_thread[lastActivePlayer].join()
-        #omxp.mute() #heto hanel
+       
         return players[activePlayer]
 
     return False
@@ -667,7 +655,7 @@ class Launch(QtCore.QObject):
             QtCore.QTimer.singleShot(5000, self.hide)
             self.changeStep(0)
     def changeLanguage(self, language):
-        print("launch, changelanguage"+language)
+   
         if(language == "rus"):
             base_path = os.path.abspath(".")
             path = os.path.join(base_path, 't1_rus.qm')
@@ -679,7 +667,7 @@ class Launch(QtCore.QObject):
         if(language =="arm"):
             app.removeTranslator(self.translator)
         
-        # self.view.retranslate()
+    
 
         
         self.view.retranslate()
@@ -923,5 +911,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         resetApps()
         print >> sys.stderr, '\nExiting by user request.\n'
-        sys.exit(0)
+       
+    GPIO.cleanup()
     sys.exit()

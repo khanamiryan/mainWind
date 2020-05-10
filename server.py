@@ -21,6 +21,7 @@ import paho.mqtt.client as mqtt
 isStarted = False
 client = mqtt.Client()
 
+threadsArr = {}
 toDevice = "toDevice/"
 balls3 = "balls3"
 larer = "larer"
@@ -86,6 +87,9 @@ def on_message(client, userdata, msg):
     #    print("topic is "+topic)
     #    print("message is \""+message+"\"")
     
+    if(message.startswith("go-step-") or message=="go-winner"):
+        endStep(step)
+        
     if(message=="go-step-2"):
         startStep2()
     if(message=="go-step-3"):
@@ -260,7 +264,12 @@ def startStep2():#arajin angam anjatvum sax
     publish("mainDisplay","startFirstVideo")
     
     
-    
+
+        
+
+
+
+
 
 def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
     global step
@@ -276,10 +285,12 @@ def startStep3(): #mianum en gndakner@ u larer@ verjapes sksum en askhatel
     t.start()
     
 def startStep31():
+    global step
     step=3
     publish("mainDisplay","startStep31Video")
 
 def startStep32():
+    global step
     step=3
     publish("mainDisplay","startStep32Video")
 
@@ -292,6 +303,7 @@ def startStep3Timer():
     
 def openD4():
     publish("relener","openD4") #gndakner@ amenaaji darakum en, bacum enq
+
 def startStep4(): 
     global step
     step=4
@@ -329,8 +341,8 @@ def startStep5():#erb petq e xax xaxan
     step=5
     
     publish("mainDisplay","startEmulation")
-    t = threading.Timer(150, startStep5Continue)##qani varkyan en xaxum
-    t.start()
+    threadsArr["step5"] = threading.Timer(150, startStep5Continue)##qani varkyan en xaxum
+    threadsArr["step5"].start()
 
 def startStep5Continue():#xax@ avartecin asuma, petq a zenqov kraken
     global step
@@ -340,6 +352,7 @@ def startStep5Continue():#xax@ avartecin asuma, petq a zenqov kraken
     
     t = threading.Timer(3, startStep5ContinueTimer)
     t.start()
+    t.join()
     
     
 def startStep5ContinueTimer():
@@ -388,6 +401,9 @@ def startStep6():#petq a licqavoren zenq@
     publish("luyser","turnedoff")
     publish("balls3","turnedoff")
     
+
+
+
 
 def startStep7():##videon mianuma, klaviatiuran barcranuma, erb iranq petq havaqen chisht kod@
     global step
@@ -443,8 +459,8 @@ def startStep8():
     publish("relener","down")
     publish("mainPanel","keyboardLiftActive")
     publish("lazer","closeLUYS")#miacnum en senyaki luyser@
-    t = threading.Timer(40, continueStep8)##qani varkyan en xaxum
-    t.start()
+    threadsArr["step8"] = threading.Timer(40, continueStep8)##qani varkyan en xaxum
+    threadsArr["step8"].start()
     
     
 
@@ -468,7 +484,8 @@ def winner():#haxtecin
     t = threading.Timer(5, winnerTimer)##qani varkyan en xaxum
     t.start()
     publish("ALL","finished")
-    
+
+
 def winnerTimer():
     publish("lazer","openDUR")
     return
@@ -480,17 +497,13 @@ def winnerVideoEnded():
 
 
 
+
+
 def keyboardLiftActive():
     publish("mainPanel","keyboardLiftActive")
 def keyboardLiftStopped():
     publish("mainPanel","keyboardLiftStopped")
 
-# def startStep5():#erb petq e havaqen zenqi kod@ arajin angam
-#     step=5
-    
-#     time.sleep(5)
-#     publish("mainPanel","klaviaturaActivation")
-#     publish("klaviatura","active")
 
 def klaviaturaActivationEnded():
     global step
@@ -524,6 +537,41 @@ def closeDoor(doorID):
 
 
 
+def endStep(step):#funcianer, voronq arvum en go stepi jamanak urish stepi ancneluc
+   # if(step==1):
+    
+    if(step==2):
+        publish("lazer","closeLUYS")#mianum en senyaki luyser@
+        publish("lazer","standby")#mianum en senyaki luyser@
+        publish("luyser","finished")
+    if(step==3):
+        publish("larer","finished")
+        
+        publish("balls3","finished")
+
+        publish("mainPanel","standby")
+        publish("leftPanel","standby")
+        publish("rightPanel","standby")
+        #cancel threads
+    #if(step==4):
+    if(step==5):
+        if threadsArr["step5"] is not None:
+                threadsArr["step5"].cancel()
+        publish("mainDisplay","stopEmulation")
+    if(step==6):
+        publish("lazer","closeLAZER")
+
+    if(step==7):
+        publish("relener","down")
+        publish("leftPanel","standby")
+        publish("rightPanel","standby")
+        publish("mainPanel","standby")
+        
+        publish("lazer","closeUV")
+        luyseriBlinkStop()
+    if(step==8):
+        if threadsArr["step8"] is not None:
+            threadsArr["step8"].cancel()
 
 
 ##luyser@ tartelu hamar
