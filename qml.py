@@ -726,9 +726,9 @@ class Launch(QtCore.QObject):
         self.root.isWin = False
         self.changeStep(0)
 
-        self.mainBlock.setProperty('visible',True)
+        self.mainBlock.setProperty('visible',True) 
         self.molorakner.setProperty('visible',False)
-        self.hide()
+        self.hide() 
 
 
     def showBlock(self,block):
