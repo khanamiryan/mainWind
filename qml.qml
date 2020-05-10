@@ -84,7 +84,7 @@ ApplicationWindow {
 
             }
              Text {
-
+                objectName: "moloraknerText"
                 y:200
                 width:parent.width
                 color: "#ffffff"
@@ -209,6 +209,7 @@ ApplicationWindow {
                         
                         textInput.text = textInput.text.replace(/\!/g, '1').replace(/\@/g, '2').replace(/\"/g, '2').replace(/\#/g, '3').replace(/\£/g, '3').replace(/\$/g, '4').replace(/\$/g, '4').replace(/\%/g, '5').replace(/\^/g, '6').replace(/\&/g, '7').replace(/\*/g, '8').replace(/\(/g, '9').replace(/\)/g, '0');
                         launch.textEdited(textInput.text)
+                        
                         //weaponCodeBlock.text = textInput.text
                     }
 

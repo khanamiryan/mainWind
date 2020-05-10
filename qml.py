@@ -56,22 +56,24 @@ from PyQt5.QtQuick import QQuickView
  
 redirectory = "/home/pi/"
 
-lang  = "rus"
+lang  = "arm"
 
-text = getattr(strings,lang)
+alltext = getattr(strings,lang)
 
 mainPath = "./videos/"+lang+"/"
 
 def changeLanguage(newLang):
-    global mainPath, lang, text
+    global mainPath, lang, alltext
+    if(newLang==lang):
+        return
+    alltext = getattr(strings,newLang)
 
-    text = getattr(strings,lang)
-    
     if(os.path.exists("./videos/"+newLang+"/")):
         mainPath = "./videos/"+newLang+"/"
         lang = newLang
         publish("changeLanguage"+lang.capitalize())
-        launch.changeLanguage(lang)
+        launch.changeLanguage(newLang)
+        #launch.view.retranslate()
 
 
 global status
@@ -671,12 +673,17 @@ class Launch(QtCore.QObject):
             path = os.path.join(base_path, 't1_rus.qm')
             self.translator.load(path)
             app.installTranslator(self.translator)
-            print(app)
-        
+            #self.view.retranslate()
+            # print(app
 
         if(language =="arm"):
             app.removeTranslator(self.translator)
         
+        # self.view.retranslate()
+
+        
+        self.view.retranslate()
+ 
 
   
                     
@@ -721,6 +728,7 @@ class Launch(QtCore.QObject):
 
         self.mainBlock.setProperty('visible',True)
         self.molorakner.setProperty('visible',False)
+        self.hide()
 
 
     def showBlock(self,block):
@@ -746,7 +754,8 @@ class Launch(QtCore.QObject):
         self.hideBlock(self.coordinatesBlock)
         self.hideBlock(self.fireBlock)
 
-        self.subject.setProperty('sText', text["type_weapon_code"])
+        self.subject.setProperty('sText', alltext["type_weapon_code"])
+        
 
     def step2(self):
         self.molorakner.setProperty('visible',False)
@@ -760,7 +769,7 @@ class Launch(QtCore.QObject):
         self.showBlock(self.coordinatesBlock)
         self.hideBlock(self.fireBlock)
 
-        self.subject.setProperty('sText', text["type_coordinates"])
+        self.subject.setProperty('sText', alltext["type_coordinates"])
 
 
     def step3(self):
@@ -772,7 +781,7 @@ class Launch(QtCore.QObject):
         self.showBlock(self.weaponCodeBlock)
         self.showBlock(self.coordinatesBlock)
         self.showBlock(self.fireBlock)
-        self.subject.setProperty('sText', text["press_button"])
+        self.subject.setProperty('sText', alltext["press_button"])
         
     def step3ForFail(self):
         self.molorakner.setProperty('visible',False)
@@ -784,14 +793,14 @@ class Launch(QtCore.QObject):
         self.hideBlock(self.fireBlock)
         
         #self.showBlock(self.fireBlock)
-        self.subject.setProperty('sText', text["press_button"])
+        self.subject.setProperty('sText', alltext["press_button"])
         
         self.root.setProperty('visible',True)
         self.root.showFullScreen() 
 
 
     def stepMolorakner(self,count):
-        
+        global lang
         if(count>0):
             self.moloraknerActivated = True
             self.root.setProperty('visible',True)
