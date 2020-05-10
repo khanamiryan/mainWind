@@ -4,29 +4,48 @@
 <context>
     <name>qml</name>
     <message>
-        <location filename="qml.qml" line="100"/>
-        <source>Ճիշտ մոլորակների քանակը</source>
-        <translatorcomment>асда</translatorcomment>
-        <translation>Правильное количество</translation>
+        <source>???? ??????????? ??????</source>
+        <translation type="obsolete">Правильное количество планет</translation>
     </message>
     <message>
-        <location filename="qml.qml" line="357"/>
+        <source>FATAL ERROR
+???? ? ??????? ?????????</source>
+        <translation type="obsolete">FATAL ERROR
+Произошла ошибка</translation>
+    </message>
+    <message>
+        <source>??????</source>
+        <translation type="obsolete">Дааа</translation>
+    </message>
+    <message>
+        <source>???? ??????? ????:
+?????????? ???? ????????
+ ? ?????? ?????? ??????</source>
+        <translation type="obsolete">Произошла ошибка:
+Введите правильные данные
+и нажмите красную кнопку</translation>
+    </message>
+    <message>
+        <source>Ճիշտ մոլորակների քանակը</source>
+        <translation>Правильное количество планет</translation>
+    </message>
+    <message>
         <source>FATAL ERROR
 Տեղի է ունեցել սխալմունք</source>
-        <translation></translation>
+        <translation>FATAL ERROR
+Произошла ошибка</translation>
     </message>
     <message>
-        <location filename="qml.qml" line="364"/>
         <source>Այոոոո</source>
-        <translation></translation>
+        <translation>Дааа</translation>
     </message>
     <message>
-        <location filename="qml.qml" line="369"/>
-        <location filename="qml.qml" line="374"/>
         <source>Տեղի ունեցավ սխալ:
 Մուտքագրեք ճիշտ տվյալներ
  և սեղմեք կարմիր կոճակը</source>
-        <translation></translation>
+        <translation>Произошла ошибка:
+Введите правильные данные
+и нажмите красную кнопку</translation>
     </message>
 </context>
 </TS>
