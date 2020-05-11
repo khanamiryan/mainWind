@@ -422,8 +422,9 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
             #print("players last active",players[lastActivePlayer],"going to be killed")
             #time.sleep(0.5)
             try:
+                omxp_thread[lastActivePlayer].b = 0
                 players[lastActivePlayer].stop()
-                omxp_thread[lastActivePlayer].b = 1
+                
                 print("player ",lastActivePlayer,"is killed"," filename is", players[lastActivePlayer].get_filename())
             except Exception as err: 
                 print("lastactive player error",err)    
