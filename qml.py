@@ -159,6 +159,7 @@ def on_message(msg):
         
         stopMainVideo()##petq en?
         startVideo("Step7",isMusic=True)
+        moloraknerEnabled = True
     
 
     if("molorakner-" in newStatus):
@@ -166,21 +167,26 @@ def on_message(msg):
         
 
         if(moloraknerCount==0):
-            if(launch.moloraknerActivated==True):
-                startVideo(lastVideoName)
+           # if(launch.moloraknerActivated==True):
+                #startVideo(lastVideoName)
             launch.stepMolorakner(0)
         elif(moloraknerCount>0 and moloraknerCount<5):            
             if(launch.moloraknerActivated==False):
                 lastVideoName = players[activePlayer].file_name
-                stopMainVideo()
+               # stopMainVideo()
+            try:    
+                players[activePlayer].set_video_pos(100,100,100,100)
+                players[activePlayer].set_video_crop(100,100,100,100)
+            except Exception as err:    
+                e = True
+            
             launch.stepMolorakner(moloraknerCount)
 
         
 
-    if(newStatus=="startStep8Video"):##video, voric heto arden piti havaqen kod@
+    if(newStatus=="startStep8Video"):
         startVideo("Step8")
-    
-    if(newStatus=="startWinnerVideo"):##video, voric heto arden piti havaqen kod@
+    if(newStatus=="startWinnerVideo"):
         startVideo("Winner",False,minimal_position=1)
 
 
@@ -372,6 +378,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
     global playerVolume
     global notStartVideo
     global mainPath
+    global lastVideoName
 
     if(notStartVideo==True):##ete activacrel enq, vor hajord videon chenq cuyc talu, mi angam chenq cuyc talis u gnum enq araj
         notStartVideo = False
@@ -394,7 +401,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
 
      
         if(isMusic==False):
-            vargs+=' -o local  --aspect-mode fill --display 2 --no-osd --no-keys -b  '
+            vargs+=' -o local  --aspect-mode fill --display 2 --layer 0 --nativedeinterlace --win "0 0 1000 400" --no-osd --no-keys -b  '
         else:
             vargs+=' -o local '
             
@@ -412,7 +419,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
                     dbus_name=dbusNames[activePlayer],args=vargs)
 
         players[activePlayer].file_name = movie_path
-
+        lastVideoName = players[activePlayer].file_name
          
         # print("player ",activePlayer,"is activated")
         # print("lastActivePlayer is ",lastActivePlayer)
@@ -434,6 +441,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
                 print("lastactive player error",err)    
         try:                
             players[activePlayer].play()
+            
             players[activePlayer].set_volume(playerVolume)
             
             # print(playerVolume)
