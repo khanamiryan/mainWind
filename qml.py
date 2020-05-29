@@ -186,7 +186,11 @@ def on_message(msg):
 
     if(newStatus=="killVideo"):
         stopMainVideo()
-        
+    if(newStatus=="hideVideo"):
+        hideMainVideo()
+    if(newStatus=="showVideo"):
+        showMainVideo()
+
     if(newStatus=="startEmulation"):
         startEmulation()
     if(newStatus=="stopEmulation"):
@@ -497,6 +501,25 @@ def stopMainVideo():
     except Exception as err: 
         print ("stopMainVideo error", err)
         return "notok "
+def hideMainVideo():
+    global players
+    global activePlayer
+    try:
+        if(players[activePlayer] is not None):
+            players[activePlayer].hide_video()
+    except Exception as err: 
+        print ("stopMainVideo error", err)
+        return "notok "
+def showMainVideo():
+    global players
+    global activePlayer
+    try:
+        if(players[activePlayer] is not None):
+            players[activePlayer].show_video()
+    except Exception as err: 
+        print ("stopMainVideo error", err)
+        return "notok "
+
 
 def startEmulation():
     global p
@@ -620,14 +643,14 @@ class Launch(QtCore.QObject):
             if(text.upper()=="AIL"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
-                self.subject.setProperty('sText', text["err_weapon_code"])
+                self.subject.setProperty('sText', alltext["err_weapon_code"])
                 QtCore.QTimer.singleShot(5000, self.step1)
 
         elif(self.step==2 and len(text)==3):          
             if(text=="163"):
                 QtCore.QTimer.singleShot(500, self.step3)
             else:
-                self.subject.setProperty('sText', text["err_coordinates"])
+                self.subject.setProperty('sText', alltext["err_coordinates"])
                 QtCore.QTimer.singleShot(5000, self.step2)
 
         elif(self.step==3):
