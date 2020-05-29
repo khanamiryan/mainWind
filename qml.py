@@ -372,6 +372,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
     global playerVolume
     global notStartVideo
     global mainPath
+    global lastVideoName
 
     if(notStartVideo==True):##ete activacrel enq, vor hajord videon chenq cuyc talu, mi angam chenq cuyc talis u gnum enq araj
         notStartVideo = False
@@ -412,7 +413,7 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
                     dbus_name=dbusNames[activePlayer],args=vargs)
 
         players[activePlayer].file_name = movie_path
-
+        lastVideoName = players[activePlayer].file_name
          
         # print("player ",activePlayer,"is activated")
         # print("lastActivePlayer is ",lastActivePlayer)
