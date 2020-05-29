@@ -619,14 +619,14 @@ class Launch(QtCore.QObject):
             if(text.upper()=="AIL"):##nayev mecatar
                 QtCore.QTimer.singleShot(500, self.step2)
             else:
-                self.subject.setProperty('sText', text["err_weapon_code"])
+                self.subject.setProperty('sText', alltext["err_weapon_code"])
                 QtCore.QTimer.singleShot(5000, self.step1)
 
         elif(self.step==2 and len(text)==3):          
             if(text=="163"):
                 QtCore.QTimer.singleShot(500, self.step3)
             else:
-                self.subject.setProperty('sText', text["err_coordinates"])
+                self.subject.setProperty('sText', alltext["err_coordinates"])
                 QtCore.QTimer.singleShot(5000, self.step2)
 
         elif(self.step==3):
