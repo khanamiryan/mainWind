@@ -153,7 +153,7 @@ def on_message(client, userdata, msg):
         #continueStep8()##patmec, vor moloraker@ xarnvel en, petq banali ta, vor bacen, nayev taqun pahac@
     if(step==8 and message=="5" and topic=="toServer/molorakner"):#?? stugel chisht em grel client@?
         winner()
-    if(topic=="toServer/molorakner"):
+    if(topic=="toServer/molorakner" and step==8):
         publish("mainDisplay","molorakner-"+message)
         # print ("molorakner-"+message)
     if(message=="WinnerVideoEnded"):
