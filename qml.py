@@ -186,7 +186,11 @@ def on_message(msg):
 
     if(newStatus=="killVideo"):
         stopMainVideo()
-        
+    if(newStatus=="hideVideo"):
+        hideMainVideo()
+    if(newStatus=="showVideo"):
+        showMainVideo()
+
     if(newStatus=="startEmulation"):
         startEmulation()
     if(newStatus=="stopEmulation"):
@@ -422,8 +426,9 @@ def startVideo(movie_path="Standby",loop=True,options="",minimal_position=3,isMu
             #print("players last active",players[lastActivePlayer],"going to be killed")
             #time.sleep(0.5)
             try:
+                omxp_thread[lastActivePlayer].b = 0
                 players[lastActivePlayer].stop()
-                omxp_thread[lastActivePlayer].b = 1
+                
                 print("player ",lastActivePlayer,"is killed"," filename is", players[lastActivePlayer].get_filename())
             except Exception as err: 
                 print("lastactive player error",err)    
@@ -496,6 +501,25 @@ def stopMainVideo():
     except Exception as err: 
         print ("stopMainVideo error", err)
         return "notok "
+def hideMainVideo():
+    global players
+    global activePlayer
+    try:
+        if(players[activePlayer] is not None):
+            players[activePlayer].hide_video()
+    except Exception as err: 
+        print ("stopMainVideo error", err)
+        return "notok "
+def showMainVideo():
+    global players
+    global activePlayer
+    try:
+        if(players[activePlayer] is not None):
+            players[activePlayer].show_video()
+    except Exception as err: 
+        print ("stopMainVideo error", err)
+        return "notok "
+
 
 def startEmulation():
     global p
