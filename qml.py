@@ -741,7 +741,7 @@ class Launch(QtCore.QObject):
 
         self.mainBlock.setProperty('visible',True) 
         self.molorakner.setProperty('visible',False)
-     #   self.hide() 
+        
 
 
     def showBlock(self,block):
@@ -768,7 +768,6 @@ class Launch(QtCore.QObject):
         self.hideBlock(self.fireBlock)
 
         self.subject.setProperty('sText', alltext["type_weapon_code"])
-        
         
 
     def step2(self):
