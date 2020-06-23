@@ -15,15 +15,15 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 os.chdir(dir_path)
 
 if(platform.system()=="Linux"):
-  #  import pyautogui
+   import pyautogui
     from inputs import get_gamepad
     from omxplayer.player import OMXPlayer
     import RPi.GPIO as GPIO
 
-    #GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BCM)
 
-   # GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)#Button to GPIO23
-  #  GPIO.setup(24, GPIO.OUT)  #LED to GPIO24
+    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)#Button to GPIO23
+    GPIO.setup(24, GPIO.OUT)  #LED to GPIO24
 
 
 import paho.mqtt.client as mqtt
