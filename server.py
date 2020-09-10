@@ -168,6 +168,8 @@ def on_message(client, userdata, msg):
     
     if(message=="rebootServer"):
         os.system('sudo shutdown -r now')
+    if(message=="shutdownServer"):
+        os.system('sudo halt')
 
     if(message=="startSchedule"):
        luyseriBlinkStart()
